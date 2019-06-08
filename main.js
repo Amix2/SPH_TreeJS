@@ -58,7 +58,6 @@ class World {
         }
     }
     
-
     setup(){
         this.scene = new THREE.Scene();
         
