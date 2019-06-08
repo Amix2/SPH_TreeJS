@@ -47,8 +47,15 @@ class World {
 
     //  updates positions of every particle 
     //  mesh and particle indexes must be the same
-    redrawAllBalls() {
+    redrawAllParticles() {
         if(this.fluid.particles.length != this.particleMeshList.length) throw "mesh and particle index must be the same & list must have the same length"
+        for(let i=0; i<this.particleMeshList.length; i++) {
+            let particle = this.fluid.particles[i];
+            let mesh = this.particleMeshList[i]
+            mesh.position.x = particle.R.x;
+            mesh.position.y = particle.R.y;
+            mesh.position.z = particle.R.z;
+        }
     }
     
 
@@ -91,9 +98,6 @@ class World {
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         this.renderer.render(this.scene, this.camera);   
-        //this.camera.rotation.z += 10;
-        //this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],1000,0));
-        //this.renderer.render(this.scene, this.camera);  
     };
 
     render() {
