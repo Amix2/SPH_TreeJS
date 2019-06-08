@@ -8,7 +8,7 @@ class FluidType {
 }
 
 class Fluid {
-    constructor(configuration) {
+    constructor() {
         this.particles = [];
         
         let numOfCells = Math.ceil(configuration.sceneSize[0] / configuration.kernerFunctionBase) 
@@ -19,10 +19,12 @@ class Fluid {
     }
 
     createAllCells() {
-        for(let iX=0; iX<configuration.sceneSize[0]; iX+=configuration.kernerFunctionBase) 
-            for(let iY=0; iY<configuration.sceneSize[0]; iY+=configuration.kernerFunctionBase)
-                for(let iZ=0; iZ<configuration.sceneSize[0]; iZ+=configuration.kernerFunctionBase) {
-                    this.cells[getZindex(iX, iY, iZ)] = new Cell(iX, iY, iZ);
+        let kernelBase = configuration.kernerFunctionBase;
+        for(let iX=0; iX<configuration.sceneSize[0]; iX+=kernelBase) 
+            for(let iY=0; iY<configuration.sceneSize[0]; iY+=kernelBase)
+                for(let iZ=0; iZ<configuration.sceneSize[0]; iZ+=kernelBase) {
+                    this.cells[getZindex(Math.floor(iX/kernelBase), Math.floor(iY/kernelBase), Math.floor(iZ/kernelBase))] 
+                        = new Cell(Math.floor(iX/kernelBase), Math.floor(iY/kernelBase), Math.floor(iZ/kernelBase));
                 }
     }
 
@@ -33,6 +35,21 @@ class Fluid {
     addParticle(particle) {
         this.particles.push(particle);
     }
+}
+function* getNeighbourParticles(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
+    let kernelBase = configuration.kernerFunctionBase;
+    let pX = Math.floor(particlePosition.x / kernelBase);
+    let pY = Math.floor(particlePosition.y / kernelBase);
+    let pZ = Math.floor(particlePosition.z / kernelBase);
+    for(let oX = -1; oX < 2; oX ++)
+        for(let oY = -1; oY < 2; oY ++)
+            for(let oZ = -1; oZ < 2; oZ ++) {
+                let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
+                for(let particle in world.fluid.cells[cellIndex]) {
+                    yield particle;
+                }
+            }
+    return null
 }
 
 class Particle {
@@ -48,9 +65,6 @@ class Particle {
     }
 }
 
-function* getNeighbourParticles(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
-    let particleX = particlePosition.x
-}
 
 class Cell {
     constructor(offsetX, offsetY, offsetZ) {

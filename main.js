@@ -1,8 +1,11 @@
+var world;
 window.onload = function() {
-    let world = new World();
+    world = new World();
     world.addFluidType(new FluidType(0xff0f00,10,2,true))
     world.addParticle(20, 20, 20, 0);
     world.render()
+    var gen = getNeighbourParticles(new Vector3(10,10,10))
+    console.log(gen.next().value)
 };
 
 var configuration = {
@@ -16,10 +19,11 @@ class World {
         this.camera = null; 
         this.renderer = null;
         this.particleMeshList = []
-        this.fluid = new Fluid(configuration)
+        this.fluid = new Fluid();
 
         this.setup()
-    }
+
+        }
 
     addFluidType(fluidType) {
         this.fluid.addFluidType(fluidType)
@@ -99,6 +103,7 @@ class World {
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         this.renderer.render(this.scene, this.camera);
+        window.addEventListener( 'keypress', this.onKeyPress, false );
     };
 
     render() {
@@ -116,40 +121,40 @@ class World {
     }
 
     onKeyPress(event) {
+        console.log(world)
         switch (event.code) {
             case "KeyA":
-                alert('a');
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.x += 0.1;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
             case "KeyD":
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.y -= 5 * Math.PI / 180;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],550,0));
                 break;
             case "KeyW":
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.x += 5 * Math.PI / 180;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
             case "KeyS":
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.x -= 5 * Math.PI / 180;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
             case "KeyQ":
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.z += 5 * Math.PI / 180;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
             case "KeyE":
-                this.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.1;
                 // this.camera.rotation.z -= 5 * Math.PI / 180;
                 // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
         }
-        this.renderer.render(this.scene, this.camera);
+        world.renderer.render(world.scene, world.camera);
     }
 
     onMouseWheelChange(event) {
