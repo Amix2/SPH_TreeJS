@@ -102,6 +102,7 @@ class World {
         
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
+        window.addEventListener('keypress', World.onKeyPress);
         this.renderer.render(this.scene, this.camera);
         window.addEventListener( 'keypress', this.onKeyPress, false );
     };
@@ -120,38 +121,46 @@ class World {
         //this.controls.handleResize();
     }
 
-    onKeyPress(event) {
-        console.log(world)
+    static onKeyPress(event) {
+        console.log(world);
         switch (event.code) {
             case "KeyA":
                 world.camera.rotation.y += 0.1;
-                // this.camera.rotation.x += 0.1;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
                 break;
             case "KeyD":
-                world.camera.rotation.y += 0.1;
-                // this.camera.rotation.y -= 5 * Math.PI / 180;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],550,0));
+                world.camera.rotation.y -= 0.1;
                 break;
             case "KeyW":
-                world.camera.rotation.y += 0.1;
-                // this.camera.rotation.x += 5 * Math.PI / 180;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                world.camera.rotation.x += 0.1;
                 break;
             case "KeyS":
-                world.camera.rotation.y += 0.1;
-                // this.camera.rotation.x -= 5 * Math.PI / 180;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                world.camera.rotation.x -= 0.1;
                 break;
             case "KeyQ":
-                world.camera.rotation.y += 0.1;
-                // this.camera.rotation.z += 5 * Math.PI / 180;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                world.camera.rotation.z += 0.1;
                 break;
             case "KeyE":
-                world.camera.rotation.y += 0.1;
-                // this.camera.rotation.z -= 5 * Math.PI / 180;
-                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                world.camera.rotation.z -= 0.1;
+                break;
+            case "KeyZ":
+                world.camera.zoom *= 1.1;
+                world.camera.updateProjectionMatrix();
+                break;
+            case "KeyX":
+                world.camera.zoom /= 1.1;
+                world.camera.updateProjectionMatrix();
+                break;
+            case "KeyI":
+                world.camera.position.y += 10;
+                break;
+            case "KeyJ":
+                world.camera.position.x -= 10;
+                break;
+            case "KeyK":
+                world.camera.position.y -= 10;
+                break;
+            case "KeyL":
+                world.camera.position.x += 10;
                 break;
         }
         world.renderer.render(world.scene, world.camera);
