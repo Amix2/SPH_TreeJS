@@ -146,6 +146,18 @@ class World {
                 world.camera.zoom /= 1.1;
                 world.camera.updateProjectionMatrix();
                 break;
+            case "KeyI":
+                world.camera.position.y += 10;
+                break;
+            case "KeyJ":
+                world.camera.position.x -= 10;
+                break;
+            case "KeyK":
+                world.camera.position.y -= 10;
+                break;
+            case "KeyL":
+                world.camera.position.x += 10;
+                break;
         }
         world.renderer.render(world.scene, world.camera);
     }
