@@ -7,7 +7,52 @@ class FluidType {
         this.isMoveable = isMoveable;	// szklanka to też typ płyn tylko bez możliwości przemieszczania
     }
 }
+
+class Fluid {
+    constructor(sizeX, sizeY, sizeZ, cellLength) {
+        this.particles = [];
+
+        let numOfCells = Math.ceil(sizeX / cellLength) * Math.ceil(sizeY / cellLength) * Math.ceil(sizeZ / cellLength);
+        this.cells = new Array(numOfCells);
+    }
+}
   
+
+class Particle {
+    constructor(r, fluidTypeIndex) {
+        this.R = r; // położenie
+        this.fluidTypeIndex = fluidTypeIndex;
+        
+        self.V = new Vector3(0, 0, 0);    	// prędkość
+        self.A = new Vector3(0, 0, 0);    // przyspieszenie
+        self.g = 0;   // gęstość
+        self.p = 0;   // ciśnienie
+        self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
+    }
+}
+function* getNeighboursList(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
+    
+}
+
+class Cell {
+    constructor(offsetX, offsetY, offsetZ) {
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.offsetZ = offsetZ;
+        this.particles = [];
+    }
+    
+    getMyCellIndex() {
+    }
+    
+    getMyCellOffsetX() {
+    }
+    getMyCellOffsetY() {
+    }
+    getMyCellOffsetZ() {
+    }
+    
+}
 class Vector3 {
     constructor(x, y, z) {
         this.x = x;
@@ -20,51 +65,6 @@ class Vector3 {
     }
 }
 
-class Particle {
-    constructor(r, fluidTypeIndex) {
-        this.R = r; // położenie
-        this.fluidTypeIndex = fluidTypeIndex;
-
-        self.V = new Vector3(0, 0, 0);    	// prędkość
-        self.A = new Vector3(0, 0, 0);    // przyspieszenie
-        self.g = 0;   // gęstość
-        self.p = 0;   // ciśnienie
-        self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
-    }
-}
-function* getNeighboursList(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
-
-}
-  
-class Cell {
-    constructor(offsetX, offsetY, offsetZ) {
-        this.offsetX = offsetX;
-        this.offsetY = offsetY;
-        this.offsetZ = offsetZ;
-        this.particles = [];
-    }
-
-    getMyCellIndex() {
-    }
-
-    getMyCellOffsetX() {
-    }
-    getMyCellOffsetY() {
-    }
-    getMyCellOffsetZ() {
-    }
-
-}
-  
-class Fluid {
-    constructor(sizeX, sizeY, sizeZ, cellLength) {
-        this.particles = [];
-
-        let numOfCells = Math.ceil(sizeX / cellLength) * Math.ceil(sizeY / cellLength) * Math.ceil(sizeZ / cellLength);
-        this.cells = new Array(numOfCells);
-
-    }
-}
 
 function getZindex(x, y, z) {
     return mortonEncode_magicbits(x, y, z);

@@ -10,14 +10,21 @@ class World {
        
         this.setup()
     }
+
+    drawBall(x, y, z, r) {
+        var geometry = new THREE.SphereGeometry( r, 32, 32 );
+        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        var sphere = new THREE.Mesh( geometry, material );
+        this.scene.add( sphere );
+    }
     
     setup(){
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-        this.camera.position.z = 250
+        this.camera.position.z = 1.1*World.SCENE_SIZE[2]
         this.camera.position.x = -10;
-        this.camera.position.y = 2*World.SCENE_SIZE[1];
+        this.camera.position.y = 0.9*World.SCENE_SIZE[1];
         this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
         
         this.renderer = new THREE.WebGLRenderer();
