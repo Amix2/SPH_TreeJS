@@ -1,23 +1,57 @@
 window.onload = function() {
     let world = new World();
+    world.addFluidType(new FluidType(0xff0f00,10,2,true))
+    world.addParticle(20, 20, 20, 0);
+    world.render()
 };
+
+var configuration = {
+    sceneSize: [100, 50, 100],
+    kernerFunctionBase: 1
+}
 
 class World {
     constructor() {
         this.scene = null;
         this.camera = null; 
         this.renderer = null;
+        this.particleMeshList = []
+        this.fluid = new Fluid(configuration)
        
         this.setup()
     }
 
-    drawBall(x, y, z, r) {
+    addFluidType(fluidType) {
+        this.fluid.addFluidType(fluidType)
+    }
+
+    //  creates particle and mesh
+    addParticle(x, y, z, typeIndex) {
+        if(this.fluid.fluidTypeList.length <= typeIndex) throw "Fluid Type does not exists! Add it first";
+        
+        let fluidType = this.fluid.fluidTypeList[typeIndex]
+        let particle = new Particle(new Vector3(x, y, z), typeIndex)
+        let r = fluidType.renderRadius;
+        let color = fluidType.color;
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
-        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        var material = new THREE.MeshBasicMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        this.scene.add( sphere );
+        sphere.position.x = x;
+        sphere.position.y = y;
+        sphere.position.z = z;
+
+        this.fluid.addParticle(particle);
+        this.particleMeshList.push(sphere);
+        this.scene.add( sphere );  
+    }
+
+    //  updates positions of every particle 
+    //  mesh and particle indexes must be the same
+    redrawAllBalls() {
+        if(this.fluid.particles.length != this.particleMeshList.length) throw "mesh and particle index must be the same & list must have the same length"
     }
     
+
     setup(){
         this.scene = new THREE.Scene();
         
@@ -34,7 +68,6 @@ class World {
         // Resizing window
         //THREEx.WindowResize(this.renderer, this.camera);
         document.body.appendChild( this.renderer.domElement );
-        //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         
         var geometry = new THREE.BoxGeometry( 1, 2, 3 );
         var material = new THREE.MeshBasicMaterial( { color: "#ff0000" } );
@@ -56,8 +89,16 @@ class World {
         this.scene.add( aquarium_mesh );
         
         this.scene.add( cube );
+        //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         this.renderer.render(this.scene, this.camera);   
+        //this.camera.rotation.z += 10;
+        //this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],1000,0));
+        //this.renderer.render(this.scene, this.camera);  
     };
+
+    render() {
+        this.renderer.render(this.scene, this.camera);   
+    }
 
     onWindowResize() {
 

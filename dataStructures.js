@@ -1,6 +1,5 @@
 class FluidType {
-    constructor(index, color, mass, renderRadius, isMoveable) {
-        this.index = index;
+    constructor(color, mass, renderRadius, isMoveable) {
         this.color = color;
         this.mass = mass;
         this.renderRadius = renderRadius;
@@ -9,28 +8,39 @@ class FluidType {
 }
 
 class Fluid {
-    constructor(sizeX, sizeY, sizeZ, cellLength) {
+    constructor(configuration) {
         this.particles = [];
-
-        let numOfCells = Math.ceil(sizeX / cellLength) * Math.ceil(sizeY / cellLength) * Math.ceil(sizeZ / cellLength);
+        
+        let numOfCells = Math.ceil(configuration.sceneSize[0] / configuration.kernerFunctionBase) 
+            * Math.ceil(configuration.sceneSize[1] / configuration.kernerFunctionBase) 
+            * Math.ceil(configuration.sceneSize[2] / configuration.kernerFunctionBase);
         this.cells = new Array(numOfCells);
+        this.fluidTypeList = []
+    }
+
+    addFluidType(fluidType) {
+        this.fluidTypeList.push(fluidType);
+    }
+
+    addParticle(particle) {
+        this.particles.push(particle);
     }
 }
-  
 
 class Particle {
-    constructor(r, fluidTypeIndex) {
-        this.R = r; // położenie
+    constructor(R, fluidTypeIndex) {
+        this.R = R; // położenie
         this.fluidTypeIndex = fluidTypeIndex;
         
         self.V = new Vector3(0, 0, 0);    	// prędkość
         self.A = new Vector3(0, 0, 0);    // przyspieszenie
         self.g = 0;   // gęstość
         self.p = 0;   // ciśnienie
-        self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
+        //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
     }
 }
-function* getNeighboursList(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
+
+function* getNeighbourParticlesList(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
     
 }
 
@@ -59,6 +69,10 @@ class Vector3 {
         this.y = y;
         this.z = z;
     }
+
+    x() { return this.x }
+    y() { return this.y }
+    z() { return this.z }
 
     getTreeVector() {
         return new THREE.Vector3( this.x, this.y , this.z );
