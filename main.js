@@ -17,7 +17,7 @@ class World {
         this.renderer = null;
         this.particleMeshList = []
         this.fluid = new Fluid(configuration)
-       
+
         this.setup()
     }
 
@@ -28,7 +28,7 @@ class World {
     //  creates particle and mesh
     addParticle(x, y, z, typeIndex) {
         if(this.fluid.fluidTypeList.length <= typeIndex) throw "Fluid Type does not exists! Add it first";
-        
+
         let fluidType = this.fluid.fluidTypeList[typeIndex]
         let particle = new Particle(new Vector3(x, y, z), typeIndex)
         let r = fluidType.renderRadius;
@@ -42,10 +42,10 @@ class World {
 
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
-        this.scene.add( sphere );  
+        this.scene.add( sphere );
     }
 
-    //  updates positions of every particle 
+    //  updates positions of every particle
     //  mesh and particle indexes must be the same
     redrawAllParticles() {
         if(this.fluid.particles.length != this.particleMeshList.length) throw "mesh and particle index must be the same & list must have the same length"
@@ -57,7 +57,7 @@ class World {
             mesh.position.z = particle.R.z;
         }
     }
-    
+
 
     setup(){
         this.scene = new THREE.Scene();
@@ -65,7 +65,7 @@ class World {
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
         this.camera.position.z = 1.1*World.SCENE_SIZE[2]
         this.camera.position.x = -10;
-        this.camera.position.y = 0.9*World.SCENE_SIZE[1];
+        this.camera.position.y = 2*World.SCENE_SIZE[1];
         this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
         
         this.renderer = new THREE.WebGLRenderer();
@@ -97,11 +97,11 @@ class World {
         
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
-        this.renderer.render(this.scene, this.camera);   
+        this.renderer.render(this.scene, this.camera);
     };
 
     render() {
-        this.renderer.render(this.scene, this.camera);   
+        this.renderer.render(this.scene, this.camera);
     }
 
     onWindowResize() {
@@ -112,6 +112,47 @@ class World {
         this.renderer.setSize( window.innerWidth, window.innerHeight );
 
         //this.controls.handleResize();
+    }
+
+    onKeyPress(event) {
+        switch (event.code) {
+            case "KeyA":
+                alert('a');
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.x += 0.1;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                break;
+            case "KeyD":
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.y -= 5 * Math.PI / 180;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],550,0));
+                break;
+            case "KeyW":
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.x += 5 * Math.PI / 180;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                break;
+            case "KeyS":
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.x -= 5 * Math.PI / 180;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                break;
+            case "KeyQ":
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.z += 5 * Math.PI / 180;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                break;
+            case "KeyE":
+                this.camera.rotation.y += 0.1;
+                // this.camera.rotation.z -= 5 * Math.PI / 180;
+                // this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+                break;
+        }
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    onMouseWheelChange(event) {
+        //
     }
 }
 World.SCENE_SIZE = [100, 50, 100]
