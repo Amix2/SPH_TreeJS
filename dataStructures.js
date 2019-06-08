@@ -35,6 +35,18 @@ class Fluid {
     addParticle(particle) {
         this.particles.push(particle);
     }
+
+    assignCellToParticle(particle) {
+        let kernelBase = configuration.kernerFunctionBase;
+        let cellIndex = getZindex(Math.floor(particle.R.x/kernelBase), Math.floor(particle.R.y/kernelBase), Math.floor(particle.R.z/kernelBase))
+        if(particle.cellIndex != null)  {   // remove from old cell list if assigned
+            let particleListInOldCell = this.cells[particle.cellIndex].particles;
+            particleListInOldCell.splice(particleListInOldCell.indexOf(particle));
+        }
+        // add to new cell
+        this.cells[cellIndex].particles.push(particle)
+        particle.cellIndex = cellIndex;
+    }
 }
 function* getNeighbourParticles(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
     let kernelBase = configuration.kernerFunctionBase;
@@ -57,10 +69,11 @@ class Particle {
         this.R = R; // położenie
         this.fluidTypeIndex = fluidTypeIndex;
         
-        self.V = new Vector3(0, 0, 0);    	// prędkość
-        self.A = new Vector3(0, 0, 0);    // przyspieszenie
-        self.g = 0;   // gęstość
-        self.p = 0;   // ciśnienie
+        this.V = new Vector3(0, 0, 0);    	// prędkość
+        this.A = new Vector3(0, 0, 0);    // przyspieszenie
+        this.g = 0;   // gęstość
+        this.p = 0;   // ciśnienie
+        this.cellIndex = null;
         //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
     }
 }
