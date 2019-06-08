@@ -58,6 +58,7 @@ class World {
             mesh.position.z = particle.R.z;
         }
     }
+    
 
 
     setup(){

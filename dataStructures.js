@@ -18,6 +18,14 @@ class Fluid {
         this.fluidTypeList = []
     }
 
+    createAllCells() {
+        for(let iX=0; iX<configuration.sceneSize[0]; iX+=configuration.kernerFunctionBase) 
+            for(let iY=0; iY<configuration.sceneSize[0]; iY+=configuration.kernerFunctionBase)
+                for(let iZ=0; iZ<configuration.sceneSize[0]; iZ+=configuration.kernerFunctionBase) {
+                    this.cells[getZindex(iX, iY, iZ)] = new Cell(iX, iY, iZ);
+                }
+    }
+
     addFluidType(fluidType) {
         this.fluidTypeList.push(fluidType);
     }
@@ -40,8 +48,8 @@ class Particle {
     }
 }
 
-function* getNeighbourParticlesList(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
-    
+function* getNeighbourParticles(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
+    let particleX = particlePosition.x
 }
 
 class Cell {
