@@ -138,6 +138,14 @@ class World {
             case "KeyE":
                 world.camera.rotation.z -= 0.1;
                 break;
+            case "KeyZ":
+                world.camera.zoom *= 1.1;
+                world.camera.updateProjectionMatrix();
+                break;
+            case "KeyX":
+                world.camera.zoom /= 1.1;
+                world.camera.updateProjectionMatrix();
+                break;
         }
         world.renderer.render(world.scene, world.camera);
     }
