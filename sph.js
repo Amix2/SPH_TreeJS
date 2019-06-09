@@ -62,7 +62,7 @@ class SPH {
         for (let i = 0; i < j; ++i) {
             a.add((p[i].divideScalar(q[i] * q[i]).add(pj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelDerivative(rj[i])))
         }
-        return mj * a / gj / gi;
+        return a.multiplyScalar(mj / gj / gi);
     }
 
     // 7
@@ -71,7 +71,7 @@ class SPH {
         for (let i = 0; i < j; ++i) {
             a.add((v[i].divideScalar(q[i] * q[i]).add(vj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelSecondDerivative(rj[i])))
         }
-        return theta * mj * a / gj / gi;
+        return a.multiplyScalar(theta * mj / gj / gi);
     }
 
     // 8
