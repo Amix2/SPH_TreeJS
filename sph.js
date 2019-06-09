@@ -11,11 +11,11 @@ class SPH {
     }
 
     // 3
-    static calcKernel(q, h) {
+    static calcKernel(q, h, d) {
         if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - q * q + q * q * q / 2);
+            return 3 / (2 * Math.PI) * (2 / 3 - q * q + q * q * q / 2) / Math.pow(h, d);
         } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * (Math.pow(2 - q, 3) / 6);
+            return 3 / (2 * Math.PI) * (Math.pow(2 - q, 3) / 6) / Math.pow(h, d);
         } else if (2 * h < q) {
             return 0;
         }
@@ -23,9 +23,9 @@ class SPH {
 
     static calcKernelDerivative(q, h) {
         if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - 2 * q + 3 * q * q / 2);
+            return 3 / (2 * Math.PI) * (2 / 3 - 2 * q + 3 * q * q / 2) / Math.pow(h, d);
         } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * (-3) * (Math.pow(2 - q, 2) / 6);
+            return 3 / (2 * Math.PI) * (-3) * (Math.pow(2 - q, 2) / 6) / Math.pow(h, d);
         } else if (2 * h < q) {
             return 0;
         }
@@ -33,9 +33,9 @@ class SPH {
 
     static calcKernelSecondDerivative(q, h) {
         if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * q / 2);
+            return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * q / 2) / Math.pow(h, d);
         } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * 6 * (2 - q) / 6;
+            return 3 / (2 * Math.PI) * 6 * (2 - q) / 6 / Math.pow(h, d);
         } else if (2 * h < q) {
             return 0;
         }
@@ -58,7 +58,7 @@ class SPH {
 
     // 6
     static calcPressureVector(mj, gj, gi, pj, qj, p, q, rj) {
-        let a = 0;
+        let a = new Vector3(0, 0, 0);
         for (let i = 0; i < j; ++i) {
             a += (p[i] / q[i] / q[i] + pj / qj / qj) * this.calcKernelDerivative(rj[i])
         }
@@ -67,7 +67,7 @@ class SPH {
 
     // 7
     static calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj, theta) {
-        let a = 0;
+        let a = new Vector3(0, 0, 0);
         for (let i = 0; i < j; ++i) {
             a += (v[i] / q[i] / q[i] + vj / qj / qj) * this.calcKernelSecondDerivative(rj[i])
         }
