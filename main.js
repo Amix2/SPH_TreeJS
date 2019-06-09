@@ -27,7 +27,7 @@ window.onload = function() {
 
 var configuration = {
     sceneSize: [100, 50, 100],
-    kernerFunctionBase: 1
+    kernerFunctionBase: 2
 }
 
 class World {
@@ -77,6 +77,17 @@ class World {
             mesh.position.y = particle.R.y;
             mesh.position.z = particle.R.z;
         }
+    }
+
+    addFluid(vPosition, vSize, fluidType) {
+        var volume = vSize.x * vSize.y * vSize.z
+        var gapBetweenParticles = configuration.kernerFunctionBase / 2;
+        for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
+            for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
+                for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
+                    this.addParticle(vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ, fluidType)
+                    console.log("New particle" , vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ)
+                }
     }
     
 
