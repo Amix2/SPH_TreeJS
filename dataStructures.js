@@ -11,10 +11,11 @@ class Fluid {
     constructor() {
         this.particles = [];
         
-        let numOfCells = Math.ceil(configuration.sceneSize[0] / configuration.kernerFunctionBase) 
-            * Math.ceil(configuration.sceneSize[1] / configuration.kernerFunctionBase) 
-            * Math.ceil(configuration.sceneSize[2] / configuration.kernerFunctionBase);
+        let numOfCells = (Math.ceil(configuration.sceneSize[0] / configuration.kernerFunctionBase))
+            * (Math.ceil(configuration.sceneSize[1] / configuration.kernerFunctionBase) )
+            * (Math.ceil(configuration.sceneSize[2] / configuration.kernerFunctionBase));
         this.cells = new Array(numOfCells);
+        this.createAllCells()
         this.fluidTypeList = []
     }
 
@@ -34,6 +35,7 @@ class Fluid {
 
     addParticle(particle) {
         this.particles.push(particle);
+        this.assignCellToParticle(particle)
     }
 
     assignCellToParticle(particle) {
@@ -57,8 +59,9 @@ function* getNeighbourParticles(particlePosition)	{// generator dający wszystki
         for(let oY = -1; oY < 2; oY ++)
             for(let oZ = -1; oZ < 2; oZ ++) {
                 let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
-                for(let particle in world.fluid.cells[cellIndex]) {
-                    yield particle;
+                for(let i=0; i<world.fluid.cells[cellIndex].particles.length; i++) {
+                    yield world.fluid.cells[cellIndex].particles[i];
+
                 }
             }
     return null
@@ -116,18 +119,19 @@ class Vector3 {
 
 
 function getZindex(x, y, z) {
-    return mortonEncode_magicbits(x, y, z);
+    return mortonEncode_for(x, y, z);
 }
 
 // source:    https://www.forceflow.be/2013/10/07/morton-encodingdecoding-through-bit-interleaving-implementations/
 // method to seperate bits from a given integer 3 positions apart
 function splitBy3(a) {
-    var x = a & 0x1fffff; // we only look at the first 21 bits
+    var x = a  // we only look at the first 21 bits
     x = (x | x << 32) & 0x1f00000000ffff; // shift left 32 bits, OR with self, and 00011111000000000000000000000000000000001111111111111111
     x = (x | x << 16) & 0x1f0000ff0000ff; // shift left 32 bits, OR with self, and 00011111000000000000000011111111000000000000000011111111
     x = (x | x << 8) & 0x100f00f00f00f00f; // shift left 32 bits, OR with self, and 0001000000001111000000001111000000001111000000001111000000000000
     x = (x | x << 4) & 0x10c30c30c30c30c3; // shift left 32 bits, OR with self, and 0001000011000011000011000011000011000011000011000011000100000000
     x = (x | x << 2) & 0x1249249249249249;
+    console.log(x)
     return x;
 }
     
@@ -136,3 +140,11 @@ function mortonEncode_magicbits(x, y, z) {
     answer |= splitBy3(x) | splitBy3(y) << 1 | splitBy3(z) << 2;
     return answer;
 }
+
+function mortonEncode_for(x, y, z){
+    var answer = 0;
+    for (let i = 0; i < (30)/3; ++i) {
+    answer |= ((x & (1 << i)) << 2*i) | ((y & (1 << i)) << (2*i + 1)) | ((z & (1 << i)) << (2*i + 2));
+    }
+    return answer;
+    }
