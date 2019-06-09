@@ -81,9 +81,9 @@ class SPH {
 
     // 9
     static calcAVector(mj, gj, vj, qj, gi, v, q, p, pj, theta, rj, G) {
-        return this.calcPressureVector(mj, gj, gi, pj, qj, p, q, rj) +
-            this.calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj) +
-            this.calcAOther(G)
+        return this.calcPressureVector(mj, gj, gi, pj, qj, p, q, rj).add(
+            this.calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj)).add(
+            this.calcAOther(G))
     }
 
     // 10
