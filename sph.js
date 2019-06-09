@@ -58,18 +58,18 @@ class SPH {
 
     // 6
     static calcPressureVector(mj, gj, gi, pj, qj, p, q, rj) {
-        let a = new Vector3(0, 0, 0);
+        let a = new THREE.Vector3(0, 0, 0);
         for (let i = 0; i < j; ++i) {
-            a += (p[i] / q[i] / q[i] + pj / qj / qj) * this.calcKernelDerivative(rj[i])
+            a.add((p[i].divideScalar(q[i] * q[i]).add(pj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelDerivative(rj[i])))
         }
         return mj * a / gj / gi;
     }
 
     // 7
     static calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj, theta) {
-        let a = new Vector3(0, 0, 0);
+        let a = new THREE.Vector3(0, 0, 0);
         for (let i = 0; i < j; ++i) {
-            a += (v[i] / q[i] / q[i] + vj / qj / qj) * this.calcKernelSecondDerivative(rj[i])
+            a.add((v[i].divideScalar(q[i] * q[i]).add(vj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelSecondDerivative(rj[i])))
         }
         return theta * mj * a / gj / gi;
     }
@@ -88,7 +88,7 @@ class SPH {
 
     // 10
     static calcVelocityHalfDelta(vi, t, deltaT, ai) {
-        let v = new Vector3();
+        let v = new THREE.Vector3();
         v.x = vi.x * (t - deltaT / 2) + deltaT * ai(t).x;
         v.y = vi.y * (t - deltaT / 2) + deltaT * ai(t).y;
         v.z = vi.z * (t - deltaT / 2) + deltaT * ai(t).z;
@@ -97,7 +97,7 @@ class SPH {
 
     // 11
     static calcMovementDelta(xi, t, deltaT, vi) {
-        let x = new Vector3();
+        let x = new THREE.Vector3();
         x.x = xi(t).x + vi.x * (t + deltaT / 2) * deltaT;
         x.y = xi(t).y + vi.y * (t + deltaT / 2) * deltaT;
         x.z = xi(t).z + vi.z * (t + deltaT / 2) * deltaT;
