@@ -72,8 +72,8 @@ class Particle {
         this.R = R; // położenie
         this.fluidTypeIndex = fluidTypeIndex;
         
-        this.V = new Vector3(0, 0, 0);    	// prędkość
-        this.A = new Vector3(0, 0, 0);    // przyspieszenie
+        this.V = new THREE.Vector3(0, 0, 0);    	// prędkość
+        this.A = new THREE.Vector3(0, 0, 0);    // przyspieszenie
         this.g = 0;   // gęstość
         this.p = 0;   // ciśnienie
         this.cellIndex = null;
