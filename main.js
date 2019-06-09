@@ -68,8 +68,8 @@ class World {
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-        this.camera.position.z = 1.1*World.SCENE_SIZE[2]
-        this.camera.position.x = -10;
+        this.camera.position.z = 100//1.1*World.SCENE_SIZE[2]
+        this.camera.position.x = 0
         this.camera.position.y = 2*World.SCENE_SIZE[1];
         this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
         
@@ -105,6 +105,7 @@ class World {
         window.addEventListener('keypress', World.onKeyPress);
         this.renderer.render(this.scene, this.camera);
         window.addEventListener( 'keypress', this.onKeyPress, false );
+        this.camera.lookAt(new THREE.Vector3(0,0,0));
     };
 
     render() {
@@ -122,19 +123,23 @@ class World {
     }
 
     static onKeyPress(event) {
-        console.log(world);
+        var cameraStep = 1//Math.PI/10;
         switch (event.code) {
-            case "KeyA":
-                world.camera.rotation.y += 0.1;
+            case "KeyA":    
+                world.camera.position.x -= cameraStep;
+                world.camera.lookAt(new THREE.Vector3(0,0,0));
                 break;
             case "KeyD":
-                world.camera.rotation.y -= 0.1;
+                    world.camera.position.x += cameraStep;
+                    world.camera.lookAt(new THREE.Vector3(0,0,0));
                 break;
             case "KeyW":
-                world.camera.rotation.x += 0.1;
+                    world.camera.position.z -= cameraStep;
+                    world.camera.lookAt(new THREE.Vector3(0,0,0));
                 break;
             case "KeyS":
-                world.camera.rotation.x -= 0.1;
+                    world.camera.position.z += cameraStep;
+                    world.camera.lookAt(new THREE.Vector3(0,0,0));
                 break;
             case "KeyQ":
                 world.camera.rotation.z += 0.1;
