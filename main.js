@@ -1,16 +1,30 @@
 var world;
 window.onload = function() {
     world = new World();
-    world.addFluidType(new FluidType(0xff0f00,10,2,true))
+
+    document.getElementById("addFluidTypeButton").addEventListener("click", function() {
+        var promptData = prompt("Insert fluid type data: color (format 0xef11ab), mass per particle, Cube Render Radius, is moveable by simulation (true/false)", "color, mass, radius, isMoveable");
+        var data = promptData.split(",")
+        world.addFluidType(new FluidType(Number(data[0]),Number(data[1]),Number(data[2]),Boolean(data[3])))
+    });
+
+    document.getElementById("addFluidButton").addEventListener("click", function() {
+        var promptData = prompt("Insert fluid cuboid data: Start Position (Vector3), Size (Vector3), Fluid Type\nposX, posY, posZ, sizeX, sizeY, sizeZ, fluidType", "posX, posY, posZ, sizeX, sizeY, sizeZ, fluidType");
+        var data = promptData.split(",")
+        world.addFluid(new Vector3(Number(data[0]), Number(data[1]), Number(data[2])), new Vector3(Number(data[3]), Number(data[4]), Number(data[5])), Number(data[6]));
+        world.render();
+    });
+    
+    world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
     world.addParticle(20, 20, 20, 0);
     world.render()
-    var gen = getNeighbourParticles(new Vector3(10,10,10))
-    console.log(gen.next().value)
+    //world.addFluid(new Vector3(5, 5, 5), new Vector3(10,10,10), 0)
+    world.render()
 };
 
 var configuration = {
     sceneSize: [100, 50, 100],
-    kernerFunctionBase: 1
+    kernerFunctionBase: 2
 }
 
 class World {
@@ -60,6 +74,17 @@ class World {
             mesh.position.y = particle.R.y;
             mesh.position.z = particle.R.z;
         }
+    }
+
+    addFluid(vPosition, vSize, fluidType) {
+        var volume = vSize.x * vSize.y * vSize.z
+        var gapBetweenParticles = configuration.kernerFunctionBase / 2;
+        for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
+            for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
+                for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
+                    this.addParticle(vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ, fluidType)
+                    console.log("New particle" , vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ)
+                }
     }
     
 
