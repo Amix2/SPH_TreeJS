@@ -28,7 +28,7 @@ window.onload = function() {
     world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(10,5,10), new THREE.Vector3(2,2,2), 1)
+    world.addFluid(new THREE.Vector3(10,3,10), new THREE.Vector3(2,2,2), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -37,13 +37,15 @@ window.onload = function() {
     //     console.log(part.cellIndex)
     // }
 
-    window.requestAnimationFrame(doSPH)
+    //window.requestAnimationFrame(doSPH)
+    doSPH();
+    doSPH();
 
     
 };
 
 function doSPH() {
-    console.log("Iteracja")
+    console.log("Iteracja XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     //let str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
@@ -51,7 +53,7 @@ function doSPH() {
     moveParticlesInFluidRange(world.fluid, 1, 0);
     world.redrawAllParticles();
     world.render();
-    window.requestAnimationFrame(doSPH)
+    //window.requestAnimationFrame(doSPH)
     //str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
