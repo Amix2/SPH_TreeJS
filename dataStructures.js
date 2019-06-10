@@ -40,7 +40,11 @@ class Fluid {
     addParticle(particle) {
         particle.mass = this.fluidTypeList[particle.fluidTypeIndex].mass;
         this.particles.push(particle);
-        this.assignCellToParticle(particle)
+        try{
+            this.assignCellToParticle(particle)
+        } catch(error) {
+            console.error("Cannot add particle to sim", particle)
+        }
     }
 
     assignCellToParticle(particle) {
