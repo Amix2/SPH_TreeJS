@@ -61,12 +61,12 @@ class SPH {
 
     // 6 TOOOOODOOOOOO
     // mj - masa J, pi - ciśnienie i, pj - ciśnienie j, gi - gęstość i, gj - gęstość j, dist - ||Ri - Rj||
-    static calcPressureVectorForOne(mj, gj, gi, pj, qj, p, q, rj) {
-        let a = new THREE.Vector3(0, 0, 0);
-        for (let i = 0; i < j; ++i) {
-            a.add((p[i].divideScalar(q[i] * q[i]).add(pj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelDerivative(rj[i])))
-        }
-        return a.multiplyScalar(mj / gj / gi);
+    static calcPressureVectorForOne(m_j, g_i, g_j, p_i, p_j, pos_i, pos_j, dist, h, d) {
+        let a = new THREE.Vector().add(pos_i).sub(pos_j).normalize();
+        return a.multiplyScalar(
+            (-m_j / (g_j * g_i )) *
+            (p_i / Math.pow(g_i, 2) + p_j / Math.pow(g_j, 2)) *
+            this.calcKernelDerivative(dist, h, d));
     }
 
     // 7
@@ -75,23 +75,13 @@ class SPH {
         var res = new THREE.Vector3(0, 0, 0);
         res = res.add(vi).divideScalar(Math.pow(gi, 2));
         res = res.add(vj).divideScalar(Math.pow(gj, 2));
-        res = res.multiplyScalar(mj/gj * theta)
+        res = res.multiplyScalar(mj/gj * theta);
         res.multiplyScalar(this.calcKernelSecondDerivative(dist, h, d));
         return red
 
     }
 
-    // 8
-    static calcAOther(G) {
-        return G;
-    }
-
     // 9
-    static calcAVector(mj, gj, vj, qj, gi, v, q, p, pj, theta, rj, G) {
-        return this.calcPressureVector(mj, gj, gi, pj, qj, p, q, rj).add(
-            this.calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj)).add(
-            this.calcAOther(G))
-    }
 
     // 10
     static calcVelocityHalfDelta(vi, t, deltaT, ai) {
