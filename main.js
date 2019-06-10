@@ -15,17 +15,17 @@ window.onload = function() {
         world.render();
     });
     
-    // world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
-    // world.addParticle(20, 20, 20, 0);
-    // world.render()
-    // world.addFluid(new THREE.Vector3(5, 5, 5), new THREE.Vector3(10,10,10), 0)
-    // world.render()
+    world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
+    world.addParticle(20, 20, 20, 0);
+    world.render()
+    world.addFluid(new THREE.Vector3(5, 5, 5), new THREE.Vector3(10,10,10), 0)
+    world.render()
 
-    // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
-    // console.log(world.fluid.cells)
-    // while((part = gen.next().value) != null) {
-    //     console.log(part.cellIndex)
-    // }
+    var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
+    console.log(world.fluid.cells)
+    while((part = gen.next().value) != null) {
+        console.log(part.cellIndex)
+    }
 };
 
 var configuration = {
