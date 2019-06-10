@@ -17,11 +17,12 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
-    console.log(world.fluid.fluidTypeList);
-    var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
-    
+    world.addFluidType(new FluidType(0xef11ab, 1, 0.2, false));
+    var mug = new ParticleMug(new THREE.Vector3(50,25,50), configuration.kernerFunctionBase, 0, 20, 2, 0);
+    //console.log(mug.particles);
     world.addParticleObject(mug);
+
+    world.render();
     
     // world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
     // world.addParticle(new Vector3(20, 20, 20), 0);
@@ -68,13 +69,16 @@ class World {
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
         var material = new THREE.MeshBasicMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        sphere.position = pos
+        sphere.position.x = particle.R.x;
+        sphere.position.y = particle.R.y;
+        sphere.position.z = particle.R.z;
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
     }
 
     addParticleObject(object){
+        console.log(object);
         for(var i = 0; i < object.particles.length; i++)
             this.addSolidParticle(object.particles[i]);
     }
@@ -128,7 +132,7 @@ class World {
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
         this.camera.position.z = 1.1*World.SCENE_SIZE[2]
         this.camera.position.x = -10;
-        this.camera.position.y = 2*World.SCENE_SIZE[1];
+        this.camera.position.y = 2*World.SCENE_SIZE[    1];
         this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
         
         this.renderer = new THREE.WebGLRenderer();
