@@ -2,9 +2,9 @@
 
 function calculateDensityAndPressure(particle, fluidType) {
     let g0_fluidDensity = fluidType.density;
-    console.log("g0_fluidDensity", g0_fluidDensity)
+    //console.log("g0_fluidDensity", g0_fluidDensity)
     let k_fluidStiffness = fluidType.stiffness;
-    console.log("particle", particle)
+    //console.log(particle)
     var neighbourGenerator = getNeighbourParticles(particle)
     var density = 0;
     while((nei = neighbourGenerator.next().value) != null) {
@@ -13,8 +13,8 @@ function calculateDensityAndPressure(particle, fluidType) {
     }
     particle.density = density;
     particle.pressure = SPH.calcPressure(k_fluidStiffness, particle.density, g0_fluidDensity);
-    console.log("particle.density", particle.density)
-    console.log("particle.pressure", particle.pressure)
+    //console.log("particle.density", particle.density)
+    //console.log("particle.pressure", particle.pressure)
 }
 
 // aka moveParticle()
@@ -47,7 +47,7 @@ function calculatePositionAndVelocityAndAcceleration(particle, fluidType) {
         )
     }
     var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -1000000, 0));
-    console.log("a_total", a_total)
+    //console.log("a_total", a_total)
     particle.acceleration = a_total;
     var newVelocity = SPH.calcVelocityChange(particle.velocity, configuration.deltaT, a_total);
     particle.velocity = newVelocity;
@@ -120,7 +120,7 @@ class SPH {
     static calcKernelSecondDerivative(x, h, d) {
         if (0 < x && x < h) {
             return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * x / 2) / Math.pow(h, d);
-        } else if (h < x && x < 2 * h) {
+        } else if (h < x && x< 2 * h) {
             return 3 / (2 * Math.PI) * 6 * (2 - x) / 6 / Math.pow(h, d);
         } else if (2 * h < x) {
             return 0;
