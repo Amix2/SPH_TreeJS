@@ -11,53 +11,57 @@ class SPH {
     }
 
     // 3
-    static calcKernel(q, h, d) {
-        if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - q * q + q * q * q / 2) / Math.pow(h, d);
-        } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * (Math.pow(2 - q, 3) / 6) / Math.pow(h, d);
-        } else if (2 * h < q) {
+    // x - argument, h - kernelBase, d - ilość wymiarów (3?)
+    static calcKernel(x, h, d) {   
+        if (0 < x < h) {
+            return 3 / (2 * Math.PI) * (2 / 3 - x * x + x * x * x / 2) / Math.pow(h, d);
+        } else if (h < x < 2 * h) {
+            return 3 / (2 * Math.PI) * (Math.pow(2 - x, 3) / 6) / Math.pow(h, d);
+        } else if (2 * h < x) {
             return 0;
         }
     }
 
-    static calcKernelDerivative(q, h) {
-        if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - 2 * q + 3 * q * q / 2) / Math.pow(h, d);
-        } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * (-3) * (Math.pow(2 - q, 2) / 6) / Math.pow(h, d);
-        } else if (2 * h < q) {
+    static calcKernelDerivative(x, h, d) {
+        if (0 < x < h) {
+            return 3 / (2 * Math.PI) * (2 / 3 - 2 * x + 3 * x * x / 2) / Math.pow(h, d);
+        } else if (h < x < 2 * h) {
+            return 3 / (2 * Math.PI) * (-3) * (Math.pow(2 - x, 2) / 6) / Math.pow(h, d);
+        } else if (2 * h < x) {
             return 0;
         }
     }
 
-    static calcKernelSecondDerivative(q, h) {
-        if (0 < q < h) {
-            return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * q / 2) / Math.pow(h, d);
-        } else if (h < q < 2 * h) {
-            return 3 / (2 * Math.PI) * 6 * (2 - q) / 6 / Math.pow(h, d);
-        } else if (2 * h < q) {
+    static calcKernelSecondDerivative(x, h, d) {
+        if (0 < x < h) {
+            return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * x / 2) / Math.pow(h, d);
+        } else if (h < x < 2 * h) {
+            return 3 / (2 * Math.PI) * 6 * (2 - x) / 6 / Math.pow(h, d);
+        } else if (2 * h < x) {
             return 0;
         }
     }
 
     // 4
-    static calcDensity(mj, q, h, j, d = 3) {
+    // mj - masa sąsiada, dist - ||Ri - Rj||, h - kernelBase, d - ilość wymiarów (3?)
+    static calcDensityForOne(mj, dist, h, d = 3) {  
+        return mj * this.calcKernel(dist, h, d);
         let g = 0;
         for (let i = 0; i < j; ++i) {
             g += this.calcKernel(q[i][j], h);
         }
-
         return mj * g / Math.pow(h, d);
     }
 
     // 5
+    // gi = gęstosć cząstki, g0 = gęstość płynu
     static calcPressure(k, gi, g0) {
         return k * (Math.pow(gi / g0, 7) - 1);
     }
 
-    // 6
-    static calcPressureVector(mj, gj, gi, pj, qj, p, q, rj) {
+    // 6 TOOOOODOOOOOO
+    // mj - masa J, pi - ciśnienie i, pj - ciśnienie j, gi - gęstość i, gj - gęstość j, dist - ||Ri - Rj||
+    static calcPressureVectorForOne(mj, gj, gi, pj, qj, p, q, rj) {
         let a = new THREE.Vector3(0, 0, 0);
         for (let i = 0; i < j; ++i) {
             a.add((p[i].divideScalar(q[i] * q[i]).add(pj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelDerivative(rj[i])))
@@ -66,12 +70,15 @@ class SPH {
     }
 
     // 7
-    static calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj, theta) {
-        let a = new THREE.Vector3(0, 0, 0);
-        for (let i = 0; i < j; ++i) {
-            a.add((v[i].divideScalar(q[i] * q[i]).add(vj.divideScalar(qj * qj))).multiplyScalar(this.calcKernelSecondDerivative(rj[i])))
-        }
-        return a.multiplyScalar(theta * mj / gj / gi);
+    // mj- masa J, vi- prędkość i, vj- prędkość j, gi- gęstość i, gj- gęstość j, theta- lepkość, dist- ||Ri - Rj||, h- kernelBase, d- ilość wymiarów (3?)
+    static calcViscosityVectorForOne(mj, vi, vj, gi, gj, theta, dist, h, d) {
+        var res = new THREE.Vector3(0, 0, 0);
+        res = res.add(vi).divideScalar(Math.pow(gi, 2));
+        res = res.add(vj).divideScalar(Math.pow(gj, 2));
+        res = res.multiplyScalar(mj/gj * theta)
+        res.multiplyScalar(this.calcKernelSecondDerivative(dist, h, d));
+        return red
+
     }
 
     // 8
