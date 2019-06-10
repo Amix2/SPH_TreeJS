@@ -94,14 +94,6 @@ class CircleParticleGeometry extends ParticleGeometry{
 
     generateParticles(gap, fluidIndex){
         var particles = [];
-
-        if(isRing === false){
-            let faceLength = 0;
-            while()
-        }
-        else{
-
-        }
         return particles;
     }
 }

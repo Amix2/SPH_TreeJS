@@ -1,7 +1,10 @@
 class FluidType {
-    constructor(color, mass, renderRadius, isMoveable) {
+    constructor(color, mass, stiffness, viscosity, renderRadius, density, isMoveable) {
         this.color = color;
         this.mass = mass;
+        this.stiffness = stiffness;
+        this.viscosity = viscosity;
+        this.density = density;
         this.renderRadius = renderRadius;
         this.isMoveable = isMoveable;	// szklanka to też typ płyn tylko bez możliwości przemieszczania
     }
@@ -24,6 +27,7 @@ class Fluid {
         for(let iX=0; iX<configuration.sceneSize[0]; iX+=kernelBase) 
             for(let iY=0; iY<configuration.sceneSize[0]; iY+=kernelBase)
                 for(let iZ=0; iZ<configuration.sceneSize[0]; iZ+=kernelBase) {
+                   // console.log("cell offsets:", iX, iY, iZ)
                     this.cells[getZindex(Math.floor(iX/kernelBase), Math.floor(iY/kernelBase), Math.floor(iZ/kernelBase))] 
                         = new Cell(Math.floor(iX/kernelBase), Math.floor(iY/kernelBase), Math.floor(iZ/kernelBase));
                 }
@@ -45,32 +49,37 @@ class Fluid {
             let particleListInOldCell = this.cells[particle.cellIndex].particles;
             particleListInOldCell.splice(particleListInOldCell.indexOf(particle));
         }
-        // add to new cell
+        // add to new cell)
         this.cells[cellIndex].particles.push(particle)
         particle.cellIndex = cellIndex;
     }
 }
-function* getNeighbourParticles(particlePosition)	{// generator dający wszystkie sząstki z sąsiednich komórek
+function* getNeighbourParticles(particle)	{// generator dający wszystkie sząstki z sąsiednich komórek
+    let particlePosition = particle.position
     let kernelBase = configuration.kernerFunctionBase;
     let pX = Math.floor(particlePosition.x / kernelBase);
     let pY = Math.floor(particlePosition.y / kernelBase);
     let pZ = Math.floor(particlePosition.z / kernelBase);
-    for(let oX = -1; oX < 2; oX ++)
-        for(let oY = -1; oY < 2; oY ++)
-            for(let oZ = -1; oZ < 2; oZ ++) {
-                let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
-                for(let i=0; i<world.fluid.cells[cellIndex].particles.length; i++) {
-                    yield world.fluid.cells[cellIndex].particles[i];
-
+    for(let oX = -2; oX < 3; oX ++)
+        for(let oY = -2; oY < 3; oY ++)
+            for(let oZ = -2; oZ < 3; oZ ++) {
+                try {
+                    let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
+                    for(let i=0; i<world.fluid.cells[cellIndex].particles.length; i++) {
+                        if(world.fluid.cells[cellIndex].particles[i] != particle)
+                            yield world.fluid.cells[cellIndex].particles[i];
+                    }
+                } catch(error) {
                 }
             }
     return null
 }
 
 class Particle {
-    constructor(position, fluidTypeIndex) {
+    constructor(position, fluidTypeIndex,  mass) {
         this.position = position; // położenie
         this.fluidTypeIndex = fluidTypeIndex;
+        this.mass = mass;
         
         this.velocity = new THREE.Vector3(0, 0, 0);    	// prędkość
         this.acceleration = new THREE.Vector3(0, 0, 0);    // przyspieszenie

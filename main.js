@@ -3,42 +3,65 @@ window.onload = function() {
     world = new World();
 
     document.getElementById("addFluidTypeButton").addEventListener("click", function() {
-        var promptData = prompt("Insert fluid type data: color (format 0xef11ab), mass per particle, Cube Render Radius, is moveable by simulation (true/false)", "color, mass, radius, isMoveable");
+        var promptData = prompt("Insert fluid type data: color (format 0xef11ab), mass per particle, stiffness, viscosity, Cube Render Radius, density is moveable by simulation (true/false)", "color, mass, radius, isMoveable");
         var data = promptData.split(",")
-        world.addFluidType(new FluidType(Number(data[0]),Number(data[1]),Number(data[2]),Boolean(data[3])))
+        world.addFluidType(new FluidType(Number(data[0]),Number(data[1]),Number(data[2]),Number(data[3]),Number(data[4]),Number(data[4]),Boolean(data[5])))
     });
 
     document.getElementById("addFluidButton").addEventListener("click", function() {
         var promptData = prompt("Insert fluid cuboid data: Start Position (Vector3), Size (Vector3), Fluid Type\nposX, posY, posZ, sizeX, sizeY, sizeZ, fluidType", "posX, posY, posZ, sizeX, sizeY, sizeZ, fluidType");
         var data = promptData.split(",")
-        world.addFluid(new THREE.Vector3(Number(data[0]), Number(data[1]), Number(data[2])), new THREE.Vector3(Number(data[3]), Number(data[4]), Number(data[5])), Number(data[6]));
+        world.addFluid(new THREE.Vector3(Number(data[0]), Number(data[1]), Number(data[2]))
+            , new THREE.Vector3(Number(data[3]), Number(data[4]), Number(data[5]))
+            , Number(data[6]));
         world.render();
     });
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
-    console.log(world.fluid.fluidTypeList);
-    var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
+    // world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
+    // console.log(world.fluid.fluidTypeList);
+    // var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
     
-    world.addParticleObject(mug);
+    // world.addParticleObject(mug);
     
-    // world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
-    // world.addParticle(new Vector3(20, 20, 20), 0);
-    // world.render()
-    // world.addFluid(new THREE.Vector3(5, 5, 5), new THREE.Vector3(10,10,10), 0)
-    // world.render()
+    world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
+    //world.addParticle(new Vector3(20, 20, 20), 0);
+
+    world.addFluid(new THREE.Vector3(3,1,3), new THREE.Vector3(4,5,3), 0)
+    world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
     // console.log(world.fluid.cells)
     // while((part = gen.next().value) != null) {
     //     console.log(part.cellIndex)
     // }
+
+    window.requestAnimationFrame(doSPH)
+
+    
 };
 
+function doSPH() {
+    console.log("Iteracja")
+    //let str = ""
+    //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
+    //console.log(str)
+    calculateDensityInFluidRange(world.fluid, 1, 0);
+    moveParticlesInFluidRange(world.fluid, 1, 0);
+    world.redrawAllParticles();
+    world.render();
+    window.requestAnimationFrame(doSPH)
+    //str = ""
+    //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
+    //console.log(str)
+}
+
 var configuration = {
-    sceneSize: [100, 50, 100],
-    kernerFunctionBase: 2
+    sceneSize: [20, 10, 20],
+    kernerFunctionBase: 1,
+    d_numOfDims: 3,
+    deltaT: 0.0001
 }
 
 class World {
@@ -62,13 +85,15 @@ class World {
         if(this.fluid.fluidTypeList.length <= typeIndex) throw "Fluid Type does not exists! Add it first";
 
         let fluidType = this.fluid.fluidTypeList[typeIndex]
-        let particle = new Particle(pos, typeIndex)
+        let particle = new Particle(pos, typeIndex, fluidType.mass)
         let r = fluidType.renderRadius;
         let color = fluidType.color;
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
         var material = new THREE.MeshBasicMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        sphere.position = pos
+        sphere.position.x = pos.x
+        sphere.position.y = pos.y
+        sphere.position.z = pos.z
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
@@ -110,13 +135,12 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var volume = vSize.x * vSize.y * vSize.z
-        var gapBetweenParticles = configuration.kernerFunctionBase / 2;
+        var gapBetweenParticles = configuration.kernerFunctionBase*0.9;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
+                    console.log("New particle in Fluid" , vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ)
                     this.addParticle(new THREE.Vector3(vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ), fluidType)
-                    console.log("New particle" , vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ)
                 }
     }
     
@@ -126,10 +150,10 @@ class World {
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-        this.camera.position.z = 1.1*World.SCENE_SIZE[2]
-        this.camera.position.x = -10;
-        this.camera.position.y = 2*World.SCENE_SIZE[1];
-        this.camera.lookAt(new THREE.Vector3(World.SCENE_SIZE[0],0,0));
+        this.camera.position.z = 1.1*configuration.sceneSize[2]
+        this.camera.position.x = -5;
+        this.camera.position.y = 1.1*configuration.sceneSize[1];
+        this.camera.lookAt(new THREE.Vector3(configuration.sceneSize[0],0,0));
         
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setClearColor("#ffffff");
@@ -142,14 +166,14 @@ class World {
         var geometry = new THREE.BoxGeometry( 1, 2, 3 );
         var material = new THREE.MeshBasicMaterial( { color: "#ff0000" } );
         var cube = new THREE.Mesh( geometry, material );
-        //cube.position.set(World.SCENE_SIZE[0]/2, World.SCENE_SIZE[1]/2, World.SCENE_SIZE[2]/2)
+        //cube.position.set(configuration.sceneSize[0]/2, configuration.sceneSize[1]/2, configuration.sceneSize[2]/2)
         
         // Add cube to Scene
-        var aquarium_geo = new THREE.BoxGeometry( World.SCENE_SIZE[0], World.SCENE_SIZE[1], World.SCENE_SIZE[2] );
+        var aquarium_geo = new THREE.BoxGeometry( configuration.sceneSize[0], configuration.sceneSize[1], configuration.sceneSize[2] );
         var aquarium_mat = new THREE.MeshBasicMaterial( { color: "#f0f0f0" } );
         aquarium_mat.side = THREE.BackSide;
         var aquarium_mesh = new THREE.Mesh( aquarium_geo, aquarium_mat );
-        aquarium_mesh.position.set(World.SCENE_SIZE[0]/2, World.SCENE_SIZE[1]/2, World.SCENE_SIZE[2]/2)
+        aquarium_mesh.position.set(configuration.sceneSize[0]/2, configuration.sceneSize[1]/2, configuration.sceneSize[2]/2)
         var aquarium_edges = new THREE.EdgesGeometry( aquarium_geo );
         var aquarium_line = new THREE.LineSegments( aquarium_edges, new THREE.LineBasicMaterial( { color: 0x0f0fff } ) );
         aquarium_line.position.x = aquarium_mesh.position.x
@@ -181,7 +205,6 @@ class World {
     }
 
     static onKeyPress(event) {
-        console.log(world);
         switch (event.code) {
             case "KeyA":
                 world.camera.rotation.y += 0.1;
@@ -235,5 +258,4 @@ class World {
         //
     }
 }
-World.SCENE_SIZE = [100, 50, 100]
 //                   X    Y   Z
