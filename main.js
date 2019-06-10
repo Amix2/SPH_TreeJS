@@ -20,7 +20,7 @@ window.onload = function() {
     //add mug
     //position, density, fluidIndex, radius, height, thickness
     world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
-    var mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase, 0, 7, 2, 0);
+    var mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase, 0, 3, 2, 0);
     //console.log(mug.particles);
     world.addParticleObject(mug);
 
