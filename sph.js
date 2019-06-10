@@ -73,11 +73,11 @@ class SPH {
     // mj- masa J, vi- prędkość i, vj- prędkość j, gi- gęstość i, gj- gęstość j, theta- lepkość, dist- ||Ri - Rj||, h- kernelBase, d- ilość wymiarów (3?)
     static calcViscosityVectorForOne(mj, vi, vj, gi, gj, theta, dist, h, d) {
         var res = new THREE.Vector3(0, 0, 0);
-        res = res.add(vi).divideScalar(Math.pow(gi, 2));
-        res = res.add(vj).divideScalar(Math.pow(gj, 2));
-        res = res.multiplyScalar(mj/gj * theta)
-        res.multiplyScalar(this.calcKernelSecondDerivative(dist, h, d));
-        return red
+        res.add(vi.divideScalar(Math.pow(gi, 2)));
+        res.add(vj.divideScalar(Math.pow(gj, 2)));
+        res.multiplyScalar((-1) * mj/gj * theta * this.calcKernelSecondDerivative(dist, h, d))
+        // -1 bo lepkosc powinna spowalniać ruch
+        return res
 
     }
 
@@ -86,7 +86,7 @@ class SPH {
         return G;
     }
 
-    // 9
+    // 9 // będzie licznone pięrwo wyżej bo strasznie dużo różnych parametrów
     static calcAVector(mj, gj, vj, qj, gi, v, q, p, pj, theta, rj, G) {
         return this.calcPressureVector(mj, gj, gi, pj, qj, p, q, rj).add(
             this.calcViscosityVector(mj, gj, gi, vj, qj, v, q, rj)).add(
@@ -94,20 +94,18 @@ class SPH {
     }
 
     // 10
-    static calcVelocityHalfDelta(vi, t, deltaT, ai) {
-        let v = new THREE.Vector3();
-        v.x = vi.x * (t - deltaT / 2) + deltaT * ai(t).x;
-        v.y = vi.y * (t - deltaT / 2) + deltaT * ai(t).y;
-        v.z = vi.z * (t - deltaT / 2) + deltaT * ai(t).z;
-        return v;
+    // vi- prędkosc z t-dt/2, ai- przyspieszenie w iteracji, 
+    // return prędkosc w t+dt/2
+    static calcVelocityChange(vi, dt, ai) {
+        vi.add(ai.multiplyScalar(dt))
+        return vi;
     }
 
     // 11
-    static calcMovementDelta(xi, t, deltaT, vi) {
-        let x = new THREE.Vector3();
-        x.x = xi(t).x + vi.x * (t + deltaT / 2) * deltaT;
-        x.y = xi(t).y + vi.y * (t + deltaT / 2) * deltaT;
-        x.z = xi(t).z + vi.z * (t + deltaT / 2) * deltaT;
-        return x;
+    // xi- położenie w t, vi- prędkość w t+dt/2
+    // return położenie w t+dt
+    static calcPositionChange(xi, dt, vi) {
+        xi.add(vi.multiplyScalar(dt))
+        return xi;
     }
 }
