@@ -19,16 +19,16 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    // world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
-    // console.log(world.fluid.fluidTypeList);
-    // var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
-    
-    // world.addParticleObject(mug);
+    world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
+    var mug = new ParticleMug(new THREE.Vector3(5,3,5), configuration.kernerFunctionBase, 0, 3, 2, 0);
+    //console.log(mug.particles);
+    world.addParticleObject(mug);
+
     
     world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(3,1,3), new THREE.Vector3(4,5,3), 0)
+    world.addFluid(new THREE.Vector3(3,1,3), new THREE.Vector3(4,5,3), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))

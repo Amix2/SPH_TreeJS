@@ -46,7 +46,7 @@ function calculatePositionAndVelocityAndAcceleration(particle, fluidType) {
             )
         )
     }
-    var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -1000000, 0));
+    var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -100000, 0));
     //console.log("a_total", a_total)
     particle.acceleration = a_total;
     var newVelocity = SPH.calcVelocityChange(particle.velocity, configuration.deltaT, a_total);
