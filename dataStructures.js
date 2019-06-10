@@ -40,7 +40,7 @@ class Fluid {
 
     assignCellToParticle(particle) {
         let kernelBase = configuration.kernerFunctionBase;
-        let cellIndex = getZindex(Math.floor(particle.R.x/kernelBase), Math.floor(particle.R.y/kernelBase), Math.floor(particle.R.z/kernelBase))
+        let cellIndex = getZindex(Math.floor(particle.position.x/kernelBase), Math.floor(particle.position.y/kernelBase), Math.floor(particle.position.z/kernelBase))
         if(particle.cellIndex != null)  {   // remove from old cell list if assigned
             let particleListInOldCell = this.cells[particle.cellIndex].particles;
             particleListInOldCell.splice(particleListInOldCell.indexOf(particle));
@@ -68,14 +68,14 @@ function* getNeighbourParticles(particlePosition)	{// generator dający wszystki
 }
 
 class Particle {
-    constructor(R, fluidTypeIndex) {
-        this.R = R; // położenie
+    constructor(position, fluidTypeIndex) {
+        this.position = position; // położenie
         this.fluidTypeIndex = fluidTypeIndex;
         
-        this.V = new THREE.Vector3(0, 0, 0);    	// prędkość
-        this.A = new THREE.Vector3(0, 0, 0);    // przyspieszenie
-        this.g = 0;   // gęstość
-        this.p = 0;   // ciśnienie
+        this.velocity = new THREE.Vector3(0, 0, 0);    	// prędkość
+        this.acceleration = new THREE.Vector3(0, 0, 0);    // przyspieszenie
+        this.density = 0;   // gęstość
+        this.pressure = 0;   // ciśnienie
         this.cellIndex = null;
         //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
     }

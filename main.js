@@ -88,9 +88,9 @@ class World {
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
         var material = new THREE.MeshBasicMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        sphere.position.x = particle.R.x;
-        sphere.position.y = particle.R.y;
-        sphere.position.z = particle.R.z;
+        sphere.position.x = particle.position.x;
+        sphere.position.y = particle.position.y;
+        sphere.position.z = particle.position.z;
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
@@ -103,9 +103,9 @@ class World {
         for(let i=0; i<this.particleMeshList.length; i++) {
             let particle = this.fluid.particles[i];
             let mesh = this.particleMeshList[i]
-            mesh.position.x = particle.R.x;
-            mesh.position.y = particle.R.y;
-            mesh.position.z = particle.R.z;
+            mesh.position.x = particle.position.x;
+            mesh.position.y = particle.position.y;
+            mesh.position.z = particle.position.z;
         }
     }
 
