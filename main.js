@@ -152,9 +152,9 @@ class World {
 
         //add mug
         //position, density, fluidIndex, radius, height, thickness
-        this.addFluidType(new FluidType(0xef11ab, 3, 10, false));
+        this.addFluidType(new FluidType(0xef11ab, 3, 1, false));
         console.log(this.fluidTypeList);
-        var mug = new ParticleMug(new THREE.Vector3(0,0,0), 20, 0, 10, 10, 5);
+        var mug = new ParticleMug(new THREE.Vector3(0,0,0), 3, 0, 10, 10, 2);
         this.addParticleObject(mug);
         
         this.scene.add( cube );
@@ -218,6 +218,12 @@ class World {
                 break;
             case "KeyL":
                 world.camera.position.x += 10;
+                break;            
+            case "KeyN":
+                world.camera.position.z -= 10;
+                break;
+            case "KeyM":
+                world.camera.position.z += 10;
                 break;
         }
         world.renderer.render(world.scene, world.camera);
