@@ -28,7 +28,7 @@ window.onload = function() {
     world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(3,6,3), new THREE.Vector3(2,2,2), 1)
+    world.addFluid(new THREE.Vector3(10,5,10), new THREE.Vector3(2,2,2), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
