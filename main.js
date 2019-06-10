@@ -1,4 +1,6 @@
 var world;
+var mug
+
 window.onload = function() {
     world = new World();
 
@@ -20,15 +22,15 @@ window.onload = function() {
     //add mug
     //position, density, fluidIndex, radius, height, thickness
     world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
-    var mug = new ParticleMug(new THREE.Vector3(5,3,5), configuration.kernerFunctionBase, 0, 3, 2, 0);
-    //console.log(mug.particles);
-    world.addParticleObject(mug);
+    //mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase/2, 0, 3, 2, 0);
+    //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
+    //world.addParticleObject(mug);
 
     
-    world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
+    world.addFluidType(new FluidType(0xff0f00,10, 10000, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(3,1,3), new THREE.Vector3(4,5,3), 1)
+    world.addFluid(new THREE.Vector3(10,1,10), new THREE.Vector3(4,4,4), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -38,17 +40,22 @@ window.onload = function() {
     // }
 
     window.requestAnimationFrame(doSPH)
+    // doSPH();
+    // doSPH();
 
     
 };
 
 function doSPH() {
-    console.log("Iteracja")
+    console.log("Iteracja XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     //let str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
     calculateDensityInFluidRange(world.fluid, 1, 0);
     moveParticlesInFluidRange(world.fluid, 1, 0);
+    for(let i=0; i<world.fluid.particles.length; i++) {
+        if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
+    }
     world.redrawAllParticles();
     world.render();
     window.requestAnimationFrame(doSPH)
@@ -58,7 +65,7 @@ function doSPH() {
 }
 
 var configuration = {
-    sceneSize: [20, 10, 20],
+    sceneSize: [20, 20, 20],
     kernerFunctionBase: 1,
     d_numOfDims: 3,
     deltaT: 0.0001
@@ -89,8 +96,9 @@ class World {
         let r = fluidType.renderRadius;
         let color = fluidType.color;
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
-        var material = new THREE.MeshBasicMaterial( {color: color} );
+        var material = new THREE.MeshLambertMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
+        sphere.castShadow = true;
         sphere.position.x = pos.x
         sphere.position.y = pos.y
         sphere.position.z = pos.z
@@ -100,6 +108,7 @@ class World {
     }
 
     addParticleObject(object){
+        console.log(object);
         for(var i = 0; i < object.particles.length; i++)
             this.addSolidParticle(object.particles[i]);
     }
@@ -111,8 +120,9 @@ class World {
         let r = fluidType.renderRadius;
         let color = fluidType.color;
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
-        var material = new THREE.MeshBasicMaterial( {color: color} );
+        var material = new THREE.MeshLambertMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
+        sphere.castShadow = true;
         sphere.position.x = particle.position.x;
         sphere.position.y = particle.position.y;
         sphere.position.z = particle.position.z;
@@ -135,7 +145,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase*0.9;
+        var gapBetweenParticles = configuration.kernerFunctionBase;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
@@ -166,11 +176,12 @@ class World {
         var geometry = new THREE.BoxGeometry( 1, 2, 3 );
         var material = new THREE.MeshBasicMaterial( { color: "#ff0000" } );
         var cube = new THREE.Mesh( geometry, material );
+        this.scene.add( cube );
         //cube.position.set(configuration.sceneSize[0]/2, configuration.sceneSize[1]/2, configuration.sceneSize[2]/2)
         
         // Add cube to Scene
         var aquarium_geo = new THREE.BoxGeometry( configuration.sceneSize[0], configuration.sceneSize[1], configuration.sceneSize[2] );
-        var aquarium_mat = new THREE.MeshBasicMaterial( { color: "#f0f0f0" } );
+        var aquarium_mat = new THREE.MeshLambertMaterial( { color: "#f0f0f0" } );
         aquarium_mat.side = THREE.BackSide;
         var aquarium_mesh = new THREE.Mesh( aquarium_geo, aquarium_mat );
         aquarium_mesh.position.set(configuration.sceneSize[0]/2, configuration.sceneSize[1]/2, configuration.sceneSize[2]/2)
@@ -180,10 +191,40 @@ class World {
         aquarium_line.position.y = aquarium_mesh.position.y
         aquarium_line.position.z = aquarium_mesh.position.z
         this.scene.add( aquarium_line );
-        this.scene.add( aquarium_mesh );
+        //this.scene.add( aquarium_mesh );
+
+        // LIGHT
+
+        this.renderer.setClearColor( 0xbbbbb1, 1);
+        this.renderer.shadowMapEnabled = true;
+;
+        var ambiColor = "#000000";
+        var ambientLight = new THREE.AmbientLight(ambiColor, 5);
+        this.scene.add(ambientLight)
+
+        var target = new THREE.Object3D();
+        //target.position.set(new THREE.Vector3(configuration.sceneSize[0], 0, configuration.sceneSize[2]));
+        target.position.x = 20;
+        target.position.y = 1;
+        target.position.z = 20;
+
+        var pointColor = "#ffffff";
+        var spotLight = new THREE.SpotLight(pointColor);
+        spotLight.position.x = 1;
+        spotLight.position.y = 25;
+        spotLight.position.z = 1;
+        spotLight.castShadow = true;
+        spotLight.angle = 1;
+        //spotLight.target = target;
+        spotLight.shadowBias = 0.004;
+        spotLight.distance = 0;
 
 
-        this.scene.add( cube );
+
+        this.scene.add(spotLight);
+
+
+
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         window.addEventListener('keypress', World.onKeyPress);
         this.renderer.render(this.scene, this.camera);
@@ -207,49 +248,68 @@ class World {
     static onKeyPress(event) {
         switch (event.code) {
             case "KeyA":
-                world.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.05;
                 break;
             case "KeyD":
-                world.camera.rotation.y -= 0.1;
+                world.camera.rotation.y -= 0.05;
                 break;
             case "KeyW":
-                world.camera.rotation.x += 0.1;
+                world.camera.rotation.x += 0.05;
                 break;
             case "KeyS":
-                world.camera.rotation.x -= 0.1;
+                world.camera.rotation.x -= 0.05;
                 break;
             case "KeyQ":
-                world.camera.rotation.z += 0.1;
+                world.camera.rotation.z += 0.05;
                 break;
             case "KeyE":
-                world.camera.rotation.z -= 0.1;
+                world.camera.rotation.z -= 0.05;
                 break;
             case "KeyZ":
-                world.camera.zoom *= 1.1;
+                world.camera.zoom *= 1.05;
                 world.camera.updateProjectionMatrix();
                 break;
             case "KeyX":
-                world.camera.zoom /= 1.1;
+                world.camera.zoom /= 1.05;
                 world.camera.updateProjectionMatrix();
                 break;
             case "KeyI":
-                world.camera.position.y += 10;
+                world.camera.position.y += 5;
                 break;
             case "KeyJ":
-                world.camera.position.x -= 10;
+                world.camera.position.x -= 5;
                 break;
             case "KeyK":
-                world.camera.position.y -= 10;
+                world.camera.position.y -= 5;
                 break;
             case "KeyL":
-                world.camera.position.x += 10;
+                world.camera.position.x += 5;
                 break;            
             case "KeyN":
-                world.camera.position.z -= 10;
+                world.camera.position.z -= 5;
                 break;
             case "KeyM":
-                world.camera.position.z += 10;
+                world.camera.position.z += 5;
                 break;
+
+            case "Digit1":
+                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), Math.PI / 20)
+                break
+            case "Digit2":
+                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 20)
+                break
+            case "Digit3":
+                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), Math.PI / 20)
+                break
+            case "Digit4":
+                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 20)
+                break
+            case "Digit5":
+                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), Math.PI / 20)
+                break
+            case "Digit6":
+                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 20)
+                break
         }
         world.renderer.render(world.scene, world.camera);
     }
