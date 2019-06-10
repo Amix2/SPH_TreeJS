@@ -14,18 +14,26 @@ window.onload = function() {
         world.addFluid(new THREE.Vector3(Number(data[0]), Number(data[1]), Number(data[2])), new THREE.Vector3(Number(data[3]), Number(data[4]), Number(data[5])), Number(data[6]));
         world.render();
     });
-    
-    world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
-    world.addParticle(20, 20, 20, 0);
-    world.render()
-    world.addFluid(new THREE.Vector3(5, 5, 5), new THREE.Vector3(10,10,10), 0)
-    world.render()
 
-    var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
-    console.log(world.fluid.cells)
-    while((part = gen.next().value) != null) {
-        console.log(part.cellIndex)
-    }
+    //add mug
+    //position, density, fluidIndex, radius, height, thickness
+    world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
+    console.log(world.fluid.fluidTypeList);
+    var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
+    
+    world.addParticleObject(mug);
+    
+    // world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
+    // world.addParticle(new Vector3(20, 20, 20), 0);
+    // world.render()
+    // world.addFluid(new THREE.Vector3(5, 5, 5), new THREE.Vector3(10,10,10), 0)
+    // world.render()
+
+    // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
+    // console.log(world.fluid.cells)
+    // while((part = gen.next().value) != null) {
+    //     console.log(part.cellIndex)
+    // }
 };
 
 var configuration = {
@@ -50,20 +58,39 @@ class World {
     }
 
     //  creates particle and mesh
-    addParticle(x, y, z, typeIndex) {
+    addParticle(pos, typeIndex) {
         if(this.fluid.fluidTypeList.length <= typeIndex) throw "Fluid Type does not exists! Add it first";
 
         let fluidType = this.fluid.fluidTypeList[typeIndex]
-        let particle = new Particle(new Vector3(x, y, z), typeIndex)
+        let particle = new Particle(pos, typeIndex)
         let r = fluidType.renderRadius;
         let color = fluidType.color;
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
         var material = new THREE.MeshBasicMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        sphere.position.x = x;
-        sphere.position.y = y;
-        sphere.position.z = z;
+        sphere.position = pos
+        this.fluid.addParticle(particle);
+        this.particleMeshList.push(sphere);
+        this.scene.add( sphere );
+    }
 
+    addParticleObject(object){
+        for(var i = 0; i < object.particles.length; i++)
+            this.addSolidParticle(object.particles[i]);
+    }
+
+    addSolidParticle(particle) {
+        if(this.fluid.fluidTypeList.length <= particle.fluidTypeIndex) throw "Fluid Type does not exists! Add it first";
+        console.log(particle);
+        let fluidType = this.fluid.fluidTypeList[particle.fluidTypeIndex]
+        let r = fluidType.renderRadius;
+        let color = fluidType.color;
+        var geometry = new THREE.SphereGeometry( r, 32, 32 );
+        var material = new THREE.MeshBasicMaterial( {color: color} );
+        var sphere = new THREE.Mesh( geometry, material );
+        sphere.position.x = particle.R.x;
+        sphere.position.y = particle.R.y;
+        sphere.position.z = particle.R.z;
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
@@ -88,7 +115,7 @@ class World {
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
-                    this.addParticle(vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ, fluidType)
+                    this.addParticle(new THREE.Vector3(vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ), fluidType)
                     console.log("New particle" , vPosition.x+iX, vPosition.y+iY, vPosition.z+iZ)
                 }
     }
@@ -130,7 +157,8 @@ class World {
         aquarium_line.position.z = aquarium_mesh.position.z
         this.scene.add( aquarium_line );
         this.scene.add( aquarium_mesh );
-        
+
+
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         window.addEventListener('keypress', World.onKeyPress);
@@ -192,6 +220,12 @@ class World {
                 break;
             case "KeyL":
                 world.camera.position.x += 10;
+                break;            
+            case "KeyN":
+                world.camera.position.z -= 10;
+                break;
+            case "KeyM":
+                world.camera.position.z += 10;
                 break;
         }
         world.renderer.render(world.scene, world.camera);
