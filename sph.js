@@ -120,7 +120,7 @@ class SPH {
     static calcKernelSecondDerivative(x, h, d) {
         if (0 < x && x < h) {
             return 3 / (2 * Math.PI) * (2 / 3 - 2 + 6 * x / 2) / Math.pow(h, d);
-        } else if (h < x && x < 2 * h) {
+        } else if (h < x && x< 2 * h) {
             return 3 / (2 * Math.PI) * 6 * (2 - x) / 6 / Math.pow(h, d);
         } else if (2 * h < x) {
             return 0;
