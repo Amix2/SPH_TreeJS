@@ -47,8 +47,8 @@ function doSPH() {
     //let str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
-    calculateDensityInFluidRange(world.fluid, 1, 0);
-    moveParticlesInFluidRange(world.fluid, 1, 0);
+    SPHMultithread.calculateDensityInFluidRangeMultithread(world.fluid, 1, 0);
+    SPHMultithread.moveParticlesInFluidRangeMultithread(world.fluid, 1, 0);
     world.redrawAllParticles();
     world.render();
     window.requestAnimationFrame(doSPH)
@@ -57,11 +57,12 @@ function doSPH() {
     //console.log(str)
 }
 
-var configuration = {
+const configuration = {
     sceneSize: [20, 10, 20],
     kernerFunctionBase: 1,
     d_numOfDims: 3,
-    deltaT: 0.0001
+    deltaT: 0.0001,
+    paralelismLevel: 10
 }
 
 class World {

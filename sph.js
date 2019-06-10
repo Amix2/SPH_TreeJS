@@ -80,6 +80,132 @@ function moveParticlesInFluidRange(fluid, numOfGroups, thisGroupNumber) {
 }
 
 
+class CondVar {
+    constructor() {
+        var _res, _rej;
+
+        this.promise = new Promise((res, rej) => {
+            _res = res;
+            _rej = rej;
+        });
+
+        this._resolve = _res;
+        this._reject  = _rej;
+        this._timer   = null;
+    }
+
+    wait(timeout, result) {
+        if (typeof timeout === 'function') {
+            result = timeout;
+        }
+        else {
+            this._scheduleTimer(timeout);
+        }
+
+        this.promise.then(value => {
+            this._cancelTimer();
+            result(null, value);
+        }).catch(value => {
+            this._cancelTimer();
+            result(value);
+        });
+    }
+
+    complete(value) {
+        this._resolve(value);
+    }
+
+    cancel(value) {
+        this._reject(value);
+    }
+
+    _scheduleTimer(timeout) {
+        if (timeout > 0) {
+            this.timer = setTimeout(self => { self.cancel('timeout'); }, timeout, this);
+        }
+    }
+
+    _cancelTimer() {
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
+    }
+}
+
+
+class SPHMultithread {
+
+    static calculateDensityInFluidRangeMultithread(fluid, numOfGroups, thisGroupNumber) {
+        let groupRange = Math.floor(fluid.particles.length / numOfGroups);
+        let groupIndexStart = Math.min(groupRange * thisGroupNumber, fluid.particles.length);
+        let groupIndexEnd = Math.min(groupRange + groupIndexStart, fluid.particles.length);
+        const workers = [];
+        let doneCount = 0;
+        const condVar = new CondVar();
+        for (let i = 0; i < configuration.paralelismLevel; ++i) {
+            const worker = new Worker("calculateDensityInFluidRange.js");
+            console.log("aaaaaaa")
+            worker.addEventListener('message', (e) => {
+                console.log("calculateDensityInFluidRangeMultithread done!");
+                ++doneCount;
+                if (doneCount === groupIndexEnd - groupIndexStart + 1) {
+                    condVar.complete(true)
+                }
+            }, false);
+            workers.push(worker)
+        }
+        for (let i = groupIndexStart; i < groupIndexEnd; ++i) {
+            const worker = workers[i % configuration.paralelismLevel];
+            let particle = fluid.particles[i];
+            let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex];
+            worker.postMessage([particle, fluidType]);
+            // calculateDensityAndPressure(particle, fluidType);
+        }
+        condVar.wait(100000, (err, result) => {
+            if (err) {
+                console.log("error: " + err);
+            }
+        });
+    }
+
+    static moveParticlesInFluidRangeMultithread(fluid, numOfGroups, thisGroupNumber) {
+        let groupRange = Math.floor(fluid.particles.length / numOfGroups);
+        let groupIndexStart = Math.min(groupRange * thisGroupNumber, fluid.particles.length);
+        let groupIndexEnd = Math.min(groupRange + groupIndexStart, fluid.particles.length);
+        const workers = [];
+        let doneCount = 0;
+        const condVar = new CondVar();
+        for (let i = 0; i < configuration.paralelismLevel; ++i) {
+            const worker = new Worker("moveParticlesInFluidRange.js");
+            worker.addEventListener('message', (e) => {
+                console.log("moveParticlesInFluidRangeMultithread done!");
+                ++doneCount;
+                if (doneCount === groupIndexEnd - groupIndexStart + 1) {
+                    condVar.complete(true)
+                }
+            }, false);
+            workers.push(worker)
+        }
+        for (let i = groupIndexStart; i < groupIndexEnd; ++i) {
+            const worker = workers[i % configuration.paralelismLevel];
+            let particle = fluid.particles[i];
+            let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex];
+            if (fluidType.isMoveable) {
+                worker.postMessage([particle, fluidType]);
+            }
+            // calculateDensityAndPressure(particle, fluidType);
+        }
+        condVar.wait(100000, (err, result) => {
+            if (err) {
+                console.log("error: " + err);
+            } else {
+                console.log("Processed!!");
+            }
+        });
+    }
+}
+
+
 
 class SPH {
 
