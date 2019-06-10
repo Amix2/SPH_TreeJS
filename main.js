@@ -208,48 +208,48 @@ class World {
     static onKeyPress(event) {
         switch (event.code) {
             case "KeyA":
-                world.camera.rotation.y += 0.1;
+                world.camera.rotation.y += 0.05;
                 break;
             case "KeyD":
-                world.camera.rotation.y -= 0.1;
+                world.camera.rotation.y -= 0.05;
                 break;
             case "KeyW":
-                world.camera.rotation.x += 0.1;
+                world.camera.rotation.x += 0.05;
                 break;
             case "KeyS":
-                world.camera.rotation.x -= 0.1;
+                world.camera.rotation.x -= 0.05;
                 break;
             case "KeyQ":
-                world.camera.rotation.z += 0.1;
+                world.camera.rotation.z += 0.05;
                 break;
             case "KeyE":
-                world.camera.rotation.z -= 0.1;
+                world.camera.rotation.z -= 0.05;
                 break;
             case "KeyZ":
-                world.camera.zoom *= 1.1;
+                world.camera.zoom *= 1.05;
                 world.camera.updateProjectionMatrix();
                 break;
             case "KeyX":
-                world.camera.zoom /= 1.1;
+                world.camera.zoom /= 1.05;
                 world.camera.updateProjectionMatrix();
                 break;
             case "KeyI":
-                world.camera.position.y += 10;
+                world.camera.position.y += 5;
                 break;
             case "KeyJ":
-                world.camera.position.x -= 10;
+                world.camera.position.x -= 5;
                 break;
             case "KeyK":
-                world.camera.position.y -= 10;
+                world.camera.position.y -= 5;
                 break;
             case "KeyL":
-                world.camera.position.x += 10;
+                world.camera.position.x += 5;
                 break;            
             case "KeyN":
-                world.camera.position.z -= 10;
+                world.camera.position.z -= 5;
                 break;
             case "KeyM":
-                world.camera.position.z += 10;
+                world.camera.position.z += 5;
                 break;
         }
         world.renderer.render(world.scene, world.camera);
