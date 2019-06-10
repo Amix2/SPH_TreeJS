@@ -1,16 +1,83 @@
 // TODO fluidType.density;
 
-function calculateDensity(particle, fluidType) {
-    let g_0 = fluidType.density;
-    var neighbourGenerator = getNeighbourParticles(particle.R)
-    //particle.g
+function calculateDensityAndPressure(particle, fluidType) {
+    let g0_fluidDensity = fluidType.density;
+    //console.log("g0_fluidDensity", g0_fluidDensity)
+    let k_fluidStiffness = fluidType.stiffness;
+    //console.log(particle)
+    var neighbourGenerator = getNeighbourParticles(particle)
+    var density = 0;
+    while((nei = neighbourGenerator.next().value) != null) {
+        let dist = SPH.calcVectorDiff(particle.position, nei.position);
+        density += SPH.calcDensityForOne(nei.mass, dist, configuration.kernerFunctionBase, configuration.d_numOfDims)
+    }
+    particle.density = density;
+    particle.pressure = SPH.calcPressure(k_fluidStiffness, particle.density, g0_fluidDensity);
+    //console.log("particle.density", particle.density)
+    //console.log("particle.pressure", particle.pressure)
 }
 
 // aka moveParticle()
 function calculatePositionAndVelocityAndAcceleration(particle, fluidType) {
-
+    var neighbourGenerator = getNeighbourParticles(particle);
+    let density = particle.density;
+    let pressure = particle.pressure;
+    let position = particle.position;
+    let velocity = particle.velocity;
+    var a_pressure = new THREE.Vector3(0,0,0)
+    var a_viscosity = new THREE.Vector3(0,0,0)
+    while((nei = neighbourGenerator.next().value) != null) {
+        let dist = SPH.calcVectorDiff(position, nei.position);
+        a_pressure.add(
+            SPH.calcAccelerationPressureVectorForOne(
+                nei.mass
+                , density, nei.density
+                , pressure, nei.pressure
+                , position, nei.position
+                , dist, configuration.kernerFunctionBase, configuration.d_numOfDims
+            ));
+        a_viscosity.add(
+            SPH.calcAccelerationViscosityVectorForOne(
+                nei.mass
+                , velocity, nei.velocity
+                , density, nei.density
+                , fluidType.viscosity
+                , dist, configuration.kernerFunctionBase, configuration.d_numOfDims
+            )
+        )
+    }
+    var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -1000000, 0));
+    //console.log("a_total", a_total)
+    particle.acceleration = a_total;
+    var newVelocity = SPH.calcVelocityChange(particle.velocity, configuration.deltaT, a_total);
+    particle.velocity = newVelocity;
+    var newPosition = SPH.calcPositionChange(particle.position, configuration.deltaT, particle.velocity)
+    particle.position = newPosition;
 }
 
+function calculateDensityInFluidRange(fluid, numOfGroups, thisGroupNumber) {
+    let groupRange = Math.floor(fluid.particles.length / numOfGroups)
+    let groupIndexStart = Math.min(groupRange * thisGroupNumber, fluid.particles.length)
+    let groupIndexEnd = Math.min(groupRange + groupIndexStart, fluid.particles.length)
+    for(let i=groupIndexStart; i<groupIndexEnd; i++) {
+        let particle = fluid.particles[i]
+        let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex]
+        calculateDensityAndPressure(particle, fluidType);
+    }
+}
+
+function moveParticlesInFluidRange(fluid, numOfGroups, thisGroupNumber) {
+    let groupRange = Math.floor(fluid.particles.length / numOfGroups)
+    let groupIndexStart = Math.min(groupRange * thisGroupNumber, fluid.particles.length)
+    let groupIndexEnd = Math.min(groupRange + groupIndexStart, fluid.particles.length)
+    for(let i=groupIndexStart; i<groupIndexEnd; i++) {
+        let particle = fluid.particles[i]
+        let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex]
+        if(fluidType.isMoveable) {
+            calculatePositionAndVelocityAndAcceleration(particle, fluidType);
+        }
+    }
+}
 
 
 
@@ -29,19 +96,21 @@ class SPH {
     // 3
     // x - argument, h - kernelBase, d - ilość wymiarów (3?)
     static calcKernel(x, h, d) {   
-        if (0 < x < h) {
+        //console.log("calcKernel x, h", x, h)
+        var out;
+        if (0 <= x && x < h) {
             return 3 / (2 * Math.PI) * (2 / 3 - x * x + x * x * x / 2) / Math.pow(h, d);
-        } else if (h < x < 2 * h) {
+        } else if (h <= x && x < 2 * h) {
             return 3 / (2 * Math.PI) * (Math.pow(2 - x, 3) / 6) / Math.pow(h, d);
-        } else if (2 * h < x) {
+        } else if (2 * h <= x) {
             return 0;
         }
     }
 
     static calcKernelDerivative(x, h, d) {
-        if (0 < x < h) {
+        if (0 < x && x < h) {
             return 3 / (2 * Math.PI) * (2 / 3 - 2 * x + 3 * x * x / 2) / Math.pow(h, d);
-        } else if (h < x < 2 * h) {
+        } else if (h < x && x< 2 * h) {
             return 3 / (2 * Math.PI) * (-3) * (Math.pow(2 - x, 2) / 6) / Math.pow(h, d);
         } else if (2 * h < x) {
             return 0;
@@ -61,6 +130,7 @@ class SPH {
     // 4
     // mj - masa sąsiada, dist - ||Ri - Rj||, h - kernelBase, d - ilość wymiarów (3?)
     static calcDensityForOne(mj, dist, h, d = 3) {  
+        //console.log("this.calcKernel(dist, h, d)", this.calcKernel(dist, h, d))
         return mj * this.calcKernel(dist, h, d);
         let g = 0;
         for (let i = 0; i < j; ++i) {
@@ -77,8 +147,8 @@ class SPH {
 
     // 6 
     // mj - masa J, pi - ciśnienie i, pj - ciśnienie j, gi - gęstość i, gj - gęstość j, dist - ||Ri - Rj||
-    static calcPressureVectorForOne(m_j, g_i, g_j, p_i, p_j, pos_i, pos_j, dist, h, d) {
-        let a = new THREE.Vector().add(pos_i).sub(pos_j).normalize();
+    static calcAccelerationPressureVectorForOne(m_j, g_i, g_j, p_i, p_j, pos_i, pos_j, dist, h, d) {
+        let a = new THREE.Vector3().add(pos_i).sub(pos_j).normalize();
         return a.multiplyScalar(
             (-m_j / (g_j * g_i )) *
             (p_i / Math.pow(g_i, 2) + p_j / Math.pow(g_j, 2)) *
@@ -87,7 +157,7 @@ class SPH {
 
     // 7
     // mj- masa J, vi- prędkość i, vj- prędkość j, gi- gęstość i, gj- gęstość j, theta- lepkość, dist- ||Ri - Rj||, h- kernelBase, d- ilość wymiarów (3?)
-    static calcViscosityVectorForOne(mj, vi, vj, gi, gj, theta, dist, h, d) {
+    static calcAccelerationViscosityVectorForOne(mj, vi, vj, gi, gj, theta, dist, h, d) {
         var res = new THREE.Vector3(0, 0, 0);
         res.add(vi.divideScalar(Math.pow(gi, 2)));
         res.add(vj.divideScalar(Math.pow(gj, 2)));

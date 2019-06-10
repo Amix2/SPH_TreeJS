@@ -11,7 +11,7 @@ class ParticleObject{
         
         for(var i = 0; i < particles.length; i++){
            // console.log(particles[i]);
-            particles[i].R.add(position);
+            particles[i].position.add(position);
         }
         this.particles = particles;
     }
@@ -19,14 +19,14 @@ class ParticleObject{
     move(vector){
         this.position = this.position.add(vector);
         for(var i = 0; i < this.particles.length; i++)
-            this.particles[i].R.add(this.position);
+            this.particles[i].position.add(this.position);
     }
 
     rotatateAxis(axis, value){
         for(var i = 0; i < this.particles.length; i++) {
-            this.particles[i].R.sub(this.position);
+            this.particles[i].position.sub(this.position);
             this.particles[i].position.applyAxisAngle(axis, value);
-            this.particles[i].R.add(this.position);
+            this.particles[i].position.add(this.position);
           }
     }
 }
