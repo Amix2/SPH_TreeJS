@@ -20,7 +20,7 @@ window.onload = function() {
     //add mug
     //position, density, fluidIndex, radius, height, thickness
     world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
-    var mug = new ParticleMug(new THREE.Vector3(50,25,50), configuration.kernerFunctionBase, 0, 20, 2, 0);
+    var mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase, 0, 7, 2, 0);
     //console.log(mug.particles);
     world.addParticleObject(mug);
 
@@ -28,7 +28,7 @@ window.onload = function() {
     world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(3,1,3), new THREE.Vector3(4,5,3), 0)
+    world.addFluid(new THREE.Vector3(3,6,3), new THREE.Vector3(2,2,2), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -136,7 +136,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase*0.9;
+        var gapBetweenParticles = configuration.kernerFunctionBase*2;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {

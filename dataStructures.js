@@ -38,6 +38,7 @@ class Fluid {
     }
 
     addParticle(particle) {
+        particle.mass = this.fluidTypeList[particle.fluidTypeIndex].mass;
         this.particles.push(particle);
         this.assignCellToParticle(particle)
     }
