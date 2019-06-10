@@ -71,35 +71,36 @@ class CyllinderParticleGeometry extends ParticleGeometry{
         this.capped = capped;
     }
 
-    generateParticles(density, fluidIndex){
+    generateParticles(gap, fluidIndex){
         var particles = [];
         var layerPosition = new THREE.Vector3(0, this.position - this.height / 2.0, 0);
-        for(var i = 0; i <= this.height; i += density){
-            if((i === 0 || i + density > this.height) && this.capped === true)
-                particles = particles.concat(new CircleParticleGeometry(layerPosition, 0, this.radius).generateParticles(density, fluidIndex));
+        for(var i = 0; i <= this.height; i += gap){
+            if((i === 0 || i + gap > this.height) && this.capped === true)
+                particles = particles.concat(new CircleParticleGeometry(layerPosition, 0, this.radius).generateParticles(gap, fluidIndex));
             else
-                particles = particles.concat(new CircleParticleGeometry(layerPosition, this.radius, this.radius).generateParticles(density, fluidIndex));
-            layerPosition.add(new THREE.Vector3(0, density, 0));
+                particles = particles.concat(new CircleParticleGeometry(layerPosition, this.radius, this.radius).generateParticles(gap, fluidIndex));
+            layerPosition.add(new THREE.Vector3(0, gap, 0));
         }
         return particles;
     }
 }
 
 class CircleParticleGeometry extends ParticleGeometry{
-    constructor(position, innerRadius, outerRadius){
+    constructor(position, radius, isRing){
         super(position);
-        this.innerRadius = innerRadius;
-        this.outerRadius = outerRadius;
+        this.radius = radius;
+        this.isRing = isRing;
     }
 
-    generateParticles(density, fluidIndex){
+    generateParticles(gap, fluidIndex){
         var particles = [];
-        for(var radius = this.innerRadius; radius <= this.outerRadius; radius += density){
-            var placmentPos = new THREE.Vector3(radius, 0, 0);
-            for(var i = 0; i < density * radius; i++){
-                particles.push(new Particle(placmentPos, fluidIndex))
-                placmentPos = placmentPos.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.PI * 2.0) / (density * radius));
-            }
+
+        if(isRing === false){
+            let faceLength = 0;
+            while()
+        }
+        else{
+
         }
         return particles;
     }

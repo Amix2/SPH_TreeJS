@@ -14,6 +14,14 @@ window.onload = function() {
         world.addFluid(new THREE.Vector3(Number(data[0]), Number(data[1]), Number(data[2])), new THREE.Vector3(Number(data[3]), Number(data[4]), Number(data[5])), Number(data[6]));
         world.render();
     });
+
+    //add mug
+    //position, density, fluidIndex, radius, height, thickness
+    world.addFluidType(new FluidType(0xef11ab, 3, 1, false));
+    console.log(world.fluid.fluidTypeList);
+    var mug = new ParticleMug(new THREE.Vector3(50,25,50), 3   , 0, 10, 10, 2);
+    
+    world.addParticleObject(mug);
     
     // world.addFluidType(new FluidType(Number(0xff0f00),10,0.2,true))
     // world.addParticle(new Vector3(20, 20, 20), 0);
@@ -83,7 +91,7 @@ class World {
         sphere.position.x = particle.R.x;
         sphere.position.y = particle.R.y;
         sphere.position.z = particle.R.z;
-     //   this.fluid.addParticle(particle);
+        this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
     }
@@ -150,13 +158,7 @@ class World {
         this.scene.add( aquarium_line );
         this.scene.add( aquarium_mesh );
 
-        //add mug
-        //position, density, fluidIndex, radius, height, thickness
-        this.addFluidType(new FluidType(0xef11ab, 3, 1, false));
-        console.log(this.fluidTypeList);
-        var mug = new ParticleMug(new THREE.Vector3(0,0,0), 3, 0, 10, 10, 2);
-        this.addParticleObject(mug);
-        
+
         this.scene.add( cube );
         //window.addEventListener( 'resize', this.onWindowResize, false ); // ????????????
         window.addEventListener('keypress', World.onKeyPress);
