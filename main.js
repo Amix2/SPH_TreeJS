@@ -1,3 +1,4 @@
+
 var world;
 var mug
 
@@ -18,6 +19,8 @@ window.onload = function() {
             , Number(data[6]));
         world.render();
     });
+
+    
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
@@ -78,6 +81,7 @@ class World {
         this.renderer = null;
         this.particleMeshList = []
         this.fluid = new Fluid();
+        this.controls = null;
 
         this.setup()
 
@@ -157,6 +161,7 @@ class World {
 
 
     setup(){
+        if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -164,7 +169,11 @@ class World {
         this.camera.position.x = -5;
         this.camera.position.y = 1.1*configuration.sceneSize[1];
         this.camera.lookAt(new THREE.Vector3(configuration.sceneSize[0],0,0));
+
         
+        this.controls = new THREE.OrbitControls( this.camera );
+        this.controls.addEventListener( 'change', this.onEvent );
+
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setClearColor("#ffffff");
         this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -311,6 +320,10 @@ class World {
                 mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 20)
                 break
         }
+        world.renderer.render(world.scene, world.camera);
+    }
+
+    onEvent(){
         world.renderer.render(world.scene, world.camera);
     }
 
