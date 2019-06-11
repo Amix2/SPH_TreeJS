@@ -1,3 +1,4 @@
+
 var world;
 window.onload = function() {
     world = new World();
@@ -17,18 +18,20 @@ window.onload = function() {
         world.render();
     });
 
+    
+    world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
+    world.addFluid(new THREE.Vector3(10,3,10), new THREE.Vector3(2,2,2), 0)
     //add mug
     //position, density, fluidIndex, radius, height, thickness
     world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
-    var mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase, 0, 3, 2, 0);
+
+    var mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase, 1, 3, 2, 0);
     //console.log(mug.particles);
     world.addParticleObject(mug);
 
-    
-    world.addFluidType(new FluidType(0xff0f00,10, 100, 100,0.2, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(10,3,10), new THREE.Vector3(2,2,2), 1)
+
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -73,6 +76,7 @@ class World {
         this.renderer = null;
         this.particleMeshList = []
         this.fluid = new Fluid();
+        this.controls = null;
 
         this.setup()
 
@@ -150,6 +154,7 @@ class World {
 
 
     setup(){
+        if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -157,7 +162,11 @@ class World {
         this.camera.position.x = -5;
         this.camera.position.y = 1.1*configuration.sceneSize[1];
         this.camera.lookAt(new THREE.Vector3(configuration.sceneSize[0],0,0));
+
         
+        this.controls = new THREE.OrbitControls( this.camera );
+        this.controls.addEventListener( 'change', this.onEvent );
+
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setClearColor("#ffffff");
         this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -254,6 +263,10 @@ class World {
                 world.camera.position.z += 5;
                 break;
         }
+        world.renderer.render(world.scene, world.camera);
+    }
+
+    onEvent(){
         world.renderer.render(world.scene, world.camera);
     }
 
