@@ -12,6 +12,8 @@ function calculateDensityAndPressure(particle, fluidType) {
         density += SPH.calcDensityForOne(nei.mass, dist, configuration.kernerFunctionBase, configuration.d_numOfDims)
     }
     particle.density = density;
+    if(density < 1) 
+        particle.density = 1;
     particle.pressure = SPH.calcPressure(k_fluidStiffness, particle.density, g0_fluidDensity);
     //console.log("particle.density", particle.density)
     //console.log("particle.pressure", particle.pressure)
@@ -46,13 +48,13 @@ function calculatePositionAndVelocityAndAcceleration(particle, fluidType) {
             )
         )
     }
-    var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -1000000, 0));
+    var a_total = a_pressure.add(a_viscosity).add(new THREE.Vector3(0, -500000, 0));
     //console.log("a_total", a_total)
     particle.acceleration = a_total;
     var newVelocity = SPH.calcVelocityChange(particle.velocity, configuration.deltaT, a_total);
     particle.velocity = newVelocity;
     var newPosition = SPH.calcPositionChange(particle.position, configuration.deltaT, particle.velocity)
-    particle.position = newPosition;
+        .position = newPosition;
 }
 
 function calculateDensityInFluidRange(fluid, numOfGroups, thisGroupNumber) {

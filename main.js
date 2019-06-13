@@ -24,16 +24,16 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xef11ab, 10, 100, 100,0.2, 1,false))
-    //mug = new ParticleMug(new THREE.Vector3(10,3,10), configuration.kernerFunctionBase/2, 0, 3, 2, 0);
+    world.addFluidType(new FluidType(0xffffff, 10, 100, 100,0.4, 1,false))
+   // mug = new ParticleMug(new THREE.Vector3(10,2,10), configuration.kernerFunctionBase*0.8, 0, 3, 2, 0);
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
-    //world.addParticleObject(mug);
+ //   world.addParticleObject(mug);
 
     
-    world.addFluidType(new FluidType(0xff0f00,10, 10000, 100,0.2, 1,true))
+    world.addFluidType(new FluidType(0xff0f00,10, 1000, 10,0.5, 1,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(10,1,10), new THREE.Vector3(4,4,4), 1)
+    world.addFluid(new THREE.Vector3(9,4,9), new THREE.Vector3(5,5,5), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -56,9 +56,9 @@ function doSPH() {
     //console.log(str)
     calculateDensityInFluidRange(world.fluid, 1, 0);
     moveParticlesInFluidRange(world.fluid, 1, 0);
-    for(let i=0; i<world.fluid.particles.length; i++) {
-        if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
-    }
+    // for(let i=0; i<world.fluid.particles.length; i++) {
+    //     if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
+    // }
     world.redrawAllParticles();
     world.render();
     window.requestAnimationFrame(doSPH)
@@ -71,7 +71,7 @@ var configuration = {
     sceneSize: [20, 20, 20],
     kernerFunctionBase: 1,
     d_numOfDims: 3,
-    deltaT: 0.0001
+    deltaT: 0.00025
 }
 
 class World {
@@ -102,7 +102,8 @@ class World {
         var geometry = new THREE.SphereGeometry( r, 32, 32 );
         var material = new THREE.MeshLambertMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
-        sphere.castShadow = true;
+        //sphere.receiveShadow = true;
+        //sphere.castShadow = true;
         sphere.position.x = pos.x
         sphere.position.y = pos.y
         sphere.position.z = pos.z
@@ -127,6 +128,7 @@ class World {
         var material = new THREE.MeshLambertMaterial( {color: color} );
         var sphere = new THREE.Mesh( geometry, material );
         sphere.castShadow = true;
+        //sphere.receiveShadow = true;
         sphere.position.x = particle.position.x;
         sphere.position.y = particle.position.y;
         sphere.position.z = particle.position.z;
@@ -176,7 +178,7 @@ class World {
 
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setClearColor("#ffffff");
-        this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setSize( window.innerWidth*0.95, window.innerHeight*0.92 );
         
         // Resizing window
         //THREEx.WindowResize(this.renderer, this.camera);
@@ -256,18 +258,7 @@ class World {
 
     static onKeyPress(event) {
         switch (event.code) {
-            case "KeyA":
-                world.camera.rotation.y += 0.05;
-                break;
-            case "KeyD":
-                world.camera.rotation.y -= 0.05;
-                break;
-            case "KeyW":
-                world.camera.rotation.x += 0.05;
-                break;
-            case "KeyS":
-                world.camera.rotation.x -= 0.05;
-                break;
+            
             case "KeyQ":
                 world.camera.rotation.z += 0.05;
                 break;
@@ -318,6 +309,18 @@ class World {
                 break
             case "Digit6":
                 mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 20)
+                break
+            case "KeyW":
+                mug.move(new THREE.Vector3(0.1, 0, 0))
+                break
+            case "KeyS":
+                mug.move(new THREE.Vector3(-0.1 ,0 , 0))
+                break
+            case "KeyA":
+                mug.move(new THREE.Vector3(0, 0, -0.1))
+                break
+            case "KeyD":
+                mug.move(new THREE.Vector3(0, 0, 0.1))
                 break
         }
         world.renderer.render(world.scene, world.camera);

@@ -19,7 +19,7 @@ class ParticleObject{
     move(vector){
         this.position = this.position.add(vector);
         for(var i = 0; i < this.particles.length; i++)
-            this.particles[i].position.add(this.position);
+            this.particles[i].position.add(vector);
     }
 
     rotatateAxis(axis, value){
