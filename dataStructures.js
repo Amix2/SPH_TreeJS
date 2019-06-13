@@ -65,9 +65,9 @@ function* getNeighbourParticles(particle)	{// generator dający wszystkie sząst
     let pX = Math.floor(particlePosition.x / kernelBase);
     let pY = Math.floor(particlePosition.y / kernelBase);
     let pZ = Math.floor(particlePosition.z / kernelBase);
-    for(let oX = -2; oX < 3; oX ++)
-        for(let oY = -2; oY < 3; oY ++)
-            for(let oZ = -2; oZ < 3; oZ ++) {
+    for(let oX = -1; oX < 2; oX ++)
+        for(let oY = -1; oY < 2; oY ++)
+            for(let oZ = -1; oZ < 2; oZ ++) {
                 try {
                     let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
                     for(let i=0; i<world.fluid.cells[cellIndex].particles.length; i++) {

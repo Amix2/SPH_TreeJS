@@ -24,16 +24,16 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xffffff, 10, 100, 100,0.4, 1,false))
-   // mug = new ParticleMug(new THREE.Vector3(10,2,10), configuration.kernerFunctionBase*0.8, 0, 3, 2, 0);
+    world.addFluidType(new FluidType(0xffffff, 10, 4, 8,0.4, 90,false))
+    mug = new ParticleMug(new THREE.Vector3(10,2,10), configuration.kernerFunctionBase*0.8, 0, 2, 1, 0);
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
- //   world.addParticleObject(mug);
+    world.addParticleObject(mug);
 
     
-    world.addFluidType(new FluidType(0xff0f00,10, 1000, 10,0.5, 1,true))
+    world.addFluidType(new FluidType(0xff0f00,10, 4, 8,0.5, 90,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
 
-    world.addFluid(new THREE.Vector3(9,4,9), new THREE.Vector3(5,5,5), 1)
+    world.addFluid(new THREE.Vector3(9,4,9), new THREE.Vector3(1,1,1), 1)
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -54,8 +54,7 @@ function doSPH() {
     //let str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
-    calculateDensityInFluidRange(world.fluid, 1, 0);
-    moveParticlesInFluidRange(world.fluid, 1, 0);
+    sphIteration(world.fluid)
     // for(let i=0; i<world.fluid.particles.length; i++) {
     //     if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
     // }
@@ -71,7 +70,8 @@ var configuration = {
     sceneSize: [20, 20, 20],
     kernerFunctionBase: 1,
     d_numOfDims: 3,
-    deltaT: 0.00025
+    deltaT: 0.001,
+    gravity: new THREE.Vector3(0, -200, 0)
 }
 
 class World {
@@ -151,7 +151,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase;
+        var gapBetweenParticles = configuration.kernerFunctionBase/2;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
