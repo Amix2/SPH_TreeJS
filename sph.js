@@ -54,7 +54,7 @@ function calculatePositionAndVelocityAndAcceleration(particle, fluidType) {
     var newVelocity = SPH.calcVelocityChange(particle.velocity, configuration.deltaT, a_total);
     particle.velocity = newVelocity;
     var newPosition = SPH.calcPositionChange(particle.position, configuration.deltaT, particle.velocity)
-        .position = newPosition;
+    particle.position = newPosition;
 }
 
 function calculateDensityInFluidRange(fluid, numOfGroups, thisGroupNumber) {
