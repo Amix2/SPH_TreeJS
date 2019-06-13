@@ -1,7 +1,13 @@
 // TODO fluidType.density;
 
 function calculateDensityAndPressure(particle, fluidType) {
-
+    var neighbourGenerator = getNeighbourParticles(particle);
+    let h = configuration.kernerFunctionBase;
+    let position = particle.position;
+    let out_density = 0;
+    while((nei = neighbourGenerator.next().value) != null) {
+        let dist = SPH.calcVectorDiff(position, nei.position);
+    }
 }
 
 // aka moveParticle()
