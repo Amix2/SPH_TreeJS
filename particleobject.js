@@ -35,7 +35,7 @@ class ParticleMug extends ParticleObject {
     constructor(position, gap, fluidIndex, radius, height, thickness){
         var mugGeometries = [];
         mugGeometries.push(new CyllinderParticleGeometry(new THREE.Vector3(), radius, height)); //outer cyllinder
-        mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, height * 0.5 + gap, 0)), radius)); //outer bottom cap
+        mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, height * 0.5 + 0.5*gap, 0)), radius)); //outer bottom cap
         if(thickness > 0){
             var innerCylPos = position.add(new THREE.Vector3(0, thickness / 2.0, 0));
             var innerCylH = height - thickness;
