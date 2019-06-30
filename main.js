@@ -28,10 +28,10 @@ window.onload = function() {
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
     
     
-    world.addFluidType(new FluidType(0xff0f00,65,2000,4500,0.1, 5,true))
+    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.1, 5,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
     
-    world.addFluid(new THREE.Vector3(9,7,9), new THREE.Vector3(1,1,1), 1)
+    world.addFluid(new THREE.Vector3(9,7,9), new THREE.Vector3(2,1,2), 1)
 
     mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 2, 3, 0);
     world.addParticleObject(mug);
@@ -43,7 +43,8 @@ window.onload = function() {
     //     console.log(part.cellIndex)
     // }
 
-    window.setInterval(doSPH,20)
+    //window.setInterval(doSPH,20)
+    window.requestAnimationFrame(doSPH)
     //doSPH();
     //doSPH();
 
@@ -65,6 +66,8 @@ function doSPH() {
     //str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
+
+    window.requestAnimationFrame(doSPH)
 }
 
 var configuration = {
@@ -180,7 +183,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase/5;
+        var gapBetweenParticles = configuration.kernerFunctionBase/3;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
@@ -287,6 +290,7 @@ class World {
 
     static onKeyPress(event) {
         var glassMoveAngleDiv = 100;    // szklanka obraca się o kąt (Math.PI / glassMoveAngleDiv)
+        var glassMoveDistance = 0.005;
         switch (event.code) {
             
             case "KeyQ":
@@ -341,17 +345,24 @@ class World {
                 mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / glassMoveAngleDiv)
                 break
             case "KeyW":
-                mug.move(new THREE.Vector3(0.1, 0, 0))
+                mug.move(new THREE.Vector3(glassMoveDistance, 0, 0))
                 break
             case "KeyS":
-                mug.move(new THREE.Vector3(-0.1 ,0 , 0))
+                mug.move(new THREE.Vector3(-glassMoveDistance ,0 , 0))
                 break
             case "KeyA":
-                mug.move(new THREE.Vector3(0, 0, -0.1))
+                mug.move(new THREE.Vector3(0, 0, -glassMoveDistance))
                 break
             case "KeyD":
-                mug.move(new THREE.Vector3(0, 0, 0.1))
+                mug.move(new THREE.Vector3(0, 0, glassMoveDistance))
                 break
+            case "KeyR":
+                mug.move(new THREE.Vector3(0, -glassMoveDistance, 0))
+                break
+            case "KeyF":
+                mug.move(new THREE.Vector3(0, glassMoveDistance, 0))
+                break
+
         }
         world.renderer.render(world.scene, world.camera);
     }

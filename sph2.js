@@ -130,8 +130,9 @@ function calculateVelosityAndPosition(particle, fluidType) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //      METODA BRZEGOWA #3
-    //      Odbicie sprężyste z mnożnikiem po prędkościach jeśli cząstka jest (zadana odległość) od najbliższej cząstki szklanki, ważne jest wyliczanie wektora normalnego szklanki particle.surfaceNormalVector
-    if(particle.velocity.angleTo(particle.surfaceNormalVector) > Math.PI/2 && particle.surfaceMinDistance < configuration.kernerFunctionBase/2) {
+    //      Odbicie sprężyste z mnożnikiem po prędkościach jeśli cząstka jest (solisWallRange) od najbliższej cząstki szklanki, ważne jest wyliczanie wektora normalnego szklanki particle.surfaceNormalVector
+    let solisWallRange = configuration.kernerFunctionBase/2
+    if(particle.velocity.angleTo(particle.surfaceNormalVector) > Math.PI/2 && particle.surfaceMinDistance < solisWallRange) {
         particle.velocity = mirrorVector(pointVelocity, particle.surfaceNormalVector).multiplyScalar(configuration.glassBounceMultiplier);
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
