@@ -24,16 +24,17 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xffffff, 10, 4, 8,0.4, 90,false))
-    mug = new ParticleMug(new THREE.Vector3(10,2,10), configuration.kernerFunctionBase*0.8, 0, 2, 1, 0);
+    world.addFluidType(new FluidType(0xffffff, 65,5000,4500,0.05, 90,false))
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
-    world.addParticleObject(mug);
-
     
-    world.addFluidType(new FluidType(0xff0f00,10, 4, 8,0.5, 90,true))
+    
+    world.addFluidType(new FluidType(0xff0f00,65,2000,4500,0.1, 5,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
+    
+    world.addFluid(new THREE.Vector3(9,7,9), new THREE.Vector3(1,1,1), 1)
 
-    world.addFluid(new THREE.Vector3(9,4,9), new THREE.Vector3(1,1,1), 1)
+    mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 2, 3, 0);
+    world.addParticleObject(mug);
     world.render()
 
     // var gen = getNeighbourParticles(new THREE.Vector3(10,10,10))
@@ -42,9 +43,9 @@ window.onload = function() {
     //     console.log(part.cellIndex)
     // }
 
-    window.requestAnimationFrame(doSPH)
-    // doSPH();
-    // doSPH();
+    window.setInterval(doSPH,20)
+    //doSPH();
+    //doSPH();
 
     
 };
@@ -55,12 +56,12 @@ function doSPH() {
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
     sphIteration(world.fluid)
-    // for(let i=0; i<world.fluid.particles.length; i++) {
-    //     if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
-    // }
+    for(let i=0; i<world.fluid.particles.length; i++) {
+        if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
+    }
     world.redrawAllParticles();
     world.render();
-    window.requestAnimationFrame(doSPH)
+    //window.setInterval(doSPH,1000)
     //str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
@@ -70,8 +71,9 @@ var configuration = {
     sceneSize: [20, 20, 20],
     kernerFunctionBase: 1,
     d_numOfDims: 3,
-    deltaT: 0.001,
-    gravity: new THREE.Vector3(0, -200, 0)
+    deltaT: 0.0005,
+    gravity: new THREE.Vector3(0, -3000, 0),
+    glassBounceMultiplier: 0.7
 }
 
 class World {
@@ -80,6 +82,7 @@ class World {
         this.camera = null; 
         this.renderer = null;
         this.particleMeshList = []
+        this.arrows = [];
         this.fluid = new Fluid();
         this.controls = null;
 
@@ -110,6 +113,14 @@ class World {
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
+
+        // var lineMath = new THREE.Line3(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0));
+        // var line = new THREE.Line(
+        //     lineMath,//the line3 geometry you have yet
+        //     new THREE.LineBasicMaterial({color:0x0000ff})//basic blue color as material
+        // );
+        // this.arrows.push(lineMath);
+        // this.scene.add(line)
     }
 
     addParticleObject(object){
@@ -135,23 +146,41 @@ class World {
         this.fluid.addParticle(particle);
         this.particleMeshList.push(sphere);
         this.scene.add( sphere );
+
+        // var lineMath = new THREE.Line3(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0));
+        // var line = new THREE.Line(
+        //     lineMath,//the line3 geometry you have yet
+        //     new THREE.LineBasicMaterial({color:0x0000ff})//basic blue color as material
+        // );
+        // this.arrows.push(lineMath)
+        // this.scene.add(line)
     }
 
     //  updates positions of every particle
     //  mesh and particle indexes must be the same
     redrawAllParticles() {
         if(this.fluid.particles.length != this.particleMeshList.length) throw "mesh and particle index must be the same & list must have the same length"
+        var minZ = 1000;
+        var maxZ = 0;
         for(let i=0; i<this.particleMeshList.length; i++) {
             let particle = this.fluid.particles[i];
             let mesh = this.particleMeshList[i]
             mesh.position.x = particle.position.x;
             mesh.position.y = particle.position.y;
             mesh.position.z = particle.position.z;
+            minZ = Math.min(minZ, mesh.position.y);
+            maxZ = Math.max(maxZ, mesh.position.y);
+            //this.arrows[i].start = particle.position
         }
+        // for(let i=0; i<this.particleMeshList.length; i++) {
+        //     let mesh = this.particleMeshList[i]
+        //     let col = (mesh.position.y - minZ) / (maxZ - minZ)
+        //     mesh.material.color.setRGB (1,col,1)
+        // }
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase/2;
+        var gapBetweenParticles = configuration.kernerFunctionBase/5;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
@@ -221,7 +250,7 @@ class World {
 
         var pointColor = "#ffffff";
         var spotLight = new THREE.SpotLight(pointColor);
-        spotLight.position.x = 1;
+        spotLight.position.x = 25;
         spotLight.position.y = 25;
         spotLight.position.z = 1;
         spotLight.castShadow = true;
@@ -257,6 +286,7 @@ class World {
     }
 
     static onKeyPress(event) {
+        var glassMoveAngleDiv = 100;    // szklanka obraca się o kąt (Math.PI / glassMoveAngleDiv)
         switch (event.code) {
             
             case "KeyQ":
@@ -293,22 +323,22 @@ class World {
                 break;
 
             case "Digit1":
-                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), Math.PI / glassMoveAngleDiv)
                 break
             case "Digit2":
-                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(1, 0, 0), -Math.PI / glassMoveAngleDiv)
                 break
             case "Digit3":
-                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), Math.PI / glassMoveAngleDiv)
                 break
             case "Digit4":
-                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(0, 1, 0), -Math.PI / glassMoveAngleDiv)
                 break
             case "Digit5":
-                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), Math.PI / glassMoveAngleDiv)
                 break
             case "Digit6":
-                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 20)
+                mug.rotatateAxis(new THREE.Vector3(0, 0, 1), -Math.PI / glassMoveAngleDiv)
                 break
             case "KeyW":
                 mug.move(new THREE.Vector3(0.1, 0, 0))

@@ -60,14 +60,19 @@ class Fluid {
     }
 }
 function* getNeighbourParticles(particle)	{// generator dający wszystkie sząstki z sąsiednich komórek
+    for(let i=0; i<world.fluid.particles.length; i++) {
+        yield world.fluid.particles[i];
+    }
+    return null;
     let particlePosition = particle.position
     let kernelBase = configuration.kernerFunctionBase;
     let pX = Math.floor(particlePosition.x / kernelBase);
     let pY = Math.floor(particlePosition.y / kernelBase);
     let pZ = Math.floor(particlePosition.z / kernelBase);
-    for(let oX = -1; oX < 2; oX ++)
-        for(let oY = -1; oY < 2; oY ++)
-            for(let oZ = -1; oZ < 2; oZ ++) {
+    let range = 5;
+    for(let oX = -range; oX < range+1; oX ++)
+        for(let oY = -range; oY < range+1; oY ++)
+            for(let oZ = -range; oZ < range+1; oZ ++) {
                 try {
                     let cellIndex = getZindex(pX+oX, pY+oY, pZ+oZ);
                     for(let i=0; i<world.fluid.cells[cellIndex].particles.length; i++) {
@@ -87,10 +92,15 @@ class Particle {
         this.mass = mass;
         
         this.velocity = new THREE.Vector3(0, 0, 0);    	// prędkość
+        this.glassStaticVelocity = new THREE.Vector3(0, 0, 0);
         this.acceleration = new THREE.Vector3(0, 0, 0);    // przyspieszenie
+        this.surfaceNormalVector = new THREE.Vector3(0, 0, 0);    // wektor normalny szklanki
+        this.surfaceAvgDistance = 0;
+        this.surfaceMinDistance = 0;
         this.density = 0;   // gęstość
         this.pressure = 0;   // ciśnienie
         this.cellIndex = null;
+        this.neighbourCount = 0;
         //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
     }
 }
