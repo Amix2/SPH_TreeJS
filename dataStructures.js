@@ -92,7 +92,7 @@ class Particle {
         this.mass = mass;
         
         this.velocity = new THREE.Vector3(0, 0, 0);    	// prędkość
-        this.glassStaticVelocity = new THREE.Vector3(0, 0, 0);
+        this.glassCalculationVelocity = new THREE.Vector3(0, 0, 0);
         this.acceleration = new THREE.Vector3(0, 0, 0);    // przyspieszenie
         this.surfaceNormalVector = new THREE.Vector3(0, 0, 0);    // wektor normalny szklanki
         this.surfaceAvgDistance = 0;

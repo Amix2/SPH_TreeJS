@@ -144,10 +144,26 @@ function calculateVelosityAndPosition(particle, fluidType) {
 
 function calculateGlassAttributesForOne(glassParticle, glassFluidType) {
     var neighbourGenerator = getNeighbourParticles(particle);
-    var kernelSum = 0;
+    let h = configuration.kernerFunctionBase;
+    var kernelSumAll = 0;
     var velosityKernelSum = new THREE.Vector3();
     var pressureKernelSum = 0 ;
     var gravityDifKernelSum = new THREE.Vector3();
+    var kernelSumFluidOnly = 0;
+
+    while ((nei = neighbourGenerator.next().value) != null) {
+        let dist = SPH2.calcVectorDiff(position, nei.position);
+        kernelSumAll += SPH2.calcKernel(dist, h);
+        velosityKernelSum.add(new THREE.Vector3().add(nei.velocity).multiplyScalar(SPH2.calcKernel(dist, h)));
+
+        let neiFluidType = world.fluid.fluidTypeList[nei.fluidTypeIndex];
+        if(neiFluidType.isMoveable) {   // is fluid
+            pressureKernelSum += nei.pressure * SPH2.calcKernel(dist, h);
+            gravityDifKernelSum.add(new THREE.Vector3().add(nei.position).sub(glassParticle.position).multiplyScalar(SPH2.calcKernel(dist, h)));    // vec fglass --> fluid
+            kernelSumFluidOnly += SPH2.calcKernel(dist, h);
+        }
+    }
+    var pressureGravitySum = gravityDifKernelSum.multiply(new THREE.Vector3().add(configuration.gravity).sub(glassParticle.acceleration));
 }
 
 function calculateDensityInFluidRange(fluid, startIndex, endIndex) {
@@ -190,15 +206,31 @@ function sphIteration(fluid) {
 
 class SPH2 {
 
+    static calcKernel(x, h) {   
+        let q = x;
+        return 315
+            / (64 * Math.PI * Math.pow(h, 9)) 
+            * Math.pow(Math.pow(h, 2) - Math.pow(q, 2), 3);
+    }
+
+    static calcKernelDerivative(x, h) {
+        let q = x;
+        return  (-45) / (Math.PI * Math.pow(h, 6)) // 6 lub 9
+            * (Math.pow(h - q, 2));
+    }
+
+    static calcKernelSecondDerivative(x, h) {
+        let q = x;
+        return 45 / (Math.PI * Math.pow(h, 6))
+            * (h - q)
+    }
     static calcVectorDiff(ri, rj) {
         return Math.sqrt(Math.pow(ri.x - rj.x, 2) + Math.pow(ri.y - rj.y, 2) + Math.pow(ri.z - rj.z, 2));
     }
 
     static calcDensityForOne(m, h, dist) {
         if(dist > configuration.kernerFunctionBase) return 0;
-        return (m * 315) 
-        / (64 * Math.PI * Math.pow(h, 9)) 
-        * Math.pow(Math.pow(h, 2) - Math.pow(dist, 2), 3);
+        return m * SPH2.calcKernel(dist, h)
     }
 
     static calcPressureForOne(k, pointDensity, fluidAverageDensity) {
@@ -212,12 +244,12 @@ class SPH2 {
         let pressureScalar = m
             * (pointPressure / Math.pow(pointDensity, 2)
                 + neiPressure / Math.pow(neiDensity, 2))
-            * (-45) / (Math.PI * Math.pow(h, 6)) 
-            * (Math.pow(h - dist, 2));
+            * SPH2.calcKernelDerivative(dist, h);
         let pressureGradient = new THREE.Vector3().add(pointPosition).sub(neiPosition).normalize().multiplyScalar(pressureScalar);
 
-        let viscusScalar = m * 45 * (h - dist) * viscosityConstant 
-            / Math.PI / Math.pow(h, 6) / pointDensity / neiDensity
+        let viscusScalar = m  * viscosityConstant 
+            / pointDensity / neiDensity
+            * SPH2.calcKernelSecondDerivative(dist, h)
         let viscusTerm = new THREE.Vector3().add(neiVelosity).sub(pointVelosity).normalize().multiplyScalar(viscusScalar);
         //console.log("pressureGradient", pressureGradient, "viscusTerm", viscusTerm)
        // return new THREE.Vector3().sub(pressureGradient)
