@@ -101,6 +101,7 @@ class Particle {
         this.pressure = 0;   // ciśnienie
         this.cellIndex = null;
         this.neighbourCount = 0;
+        this.wallAcceleration =  new THREE.Vector3(0, 0, 0); // przyspieszenie ściany do testów
         //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
     }
 }

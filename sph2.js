@@ -1,4 +1,7 @@
-// TODO fluidType.density;
+var boundary_1 = false; // prosta zamiana cząstki szklanki na cząstke płynu
+var boundary_2 = false;
+var boundary_3 = true; // odbicie sprężyste
+var boundary_4 = true; // zaawansowania zamiana cząstki szklanki na cząstke płynu (wymaga dodatkowej fazy obliczania)
 
 function calculateDensityAndPressure(particle, fluidType) {
     var neighbourGenerator = getNeighbourParticles(particle);
@@ -56,28 +59,46 @@ function calculateAcceleration(particle, fluidType) {
             particle.surfaceMinDistance = Math.min(particle.surfaceMinDistance, dist)
             //  vektor normalny powierzchni
             let currentSurfacePointsVector = new THREE.Vector3().add(position).sub(nei.position);
-            currentSurfacePointsVector.divideScalar(Math.pow(currentSurfacePointsVector.length(), 3))
+            currentSurfacePointsVector.divideScalar(Math.pow(currentSurfacePointsVector.length(), 2))
             glassSurfaceVector.add(currentSurfacePointsVector)
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //      METODA BRZEGOWA #1
             //      Cząstka szklanki zamieniana jest na cząstke płynu 
-            //          TODO: prędkość z https://www.sciencedirect.com/science/article/pii/S0032591018305424 wzór (13)
-            pointAcceleration.add(SPH2.calcAccelerationForOne(
-                mass,
-                density, density,
-                position, nei.position,
-                pressure, pressure,
-                velocity, new THREE.Vector3(),
-                viscosity, dist, h
-            ))
+            //          atrybuty z https://www.sciencedirect.com/science/article/pii/S0032591018305424 wzór (13) dają  METODA BRZEGOWA #4
+            if(boundary_1) {
+                pointAcceleration.add(SPH2.calcAccelerationForOne(
+                    mass,
+                    density, density,
+                    position, nei.position,
+                    pressure, pressure,
+                    velocity, new THREE.Vector3(),
+                    viscosity, dist, h
+                ))
+            }
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //      METODA BRZEGOWA #4
+            //      Cząstka szklanki zamieniana jest na cząstke płynu 
+            //          atrybuty z https://www.sciencedirect.com/science/article/pii/S0032591018305424 wzór (13)
+            if(boundary_4) {
+                pointAcceleration.add(SPH2.calcAccelerationForOne(
+                    mass,
+                    density, nei.density,
+                    position, nei.position,
+                    pressure, nei.pressure,
+                    velocity, nei.glassCalculationVelocity,
+                    viscosity, dist, h
+                ))
+            }
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
     }
     glassSurfaceVector.normalize();
     // zamienianie cząstki szklanki na neiCount cząstek płynu w odległości particle.surfaceMinDistance i płożeniu zgodym z glassSurfaceVector
     //console.log("before", pointAcceleration)
-    if(glassSurfaceVector.length() > 0 && false) {   // near glass
+    if(glassSurfaceVector.length() > 0 && boundary_2) {   // near glass
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //      METODA BRZEGOWA #2
         //      dodawanie cząstek pomiędzy szklanką z cząstką płynu, ważne jest wyliczanie wektora normalnego szklanki glassSurfaceVector
@@ -131,9 +152,11 @@ function calculateVelosityAndPosition(particle, fluidType) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //      METODA BRZEGOWA #3
     //      Odbicie sprężyste z mnożnikiem po prędkościach jeśli cząstka jest (solisWallRange) od najbliższej cząstki szklanki, ważne jest wyliczanie wektora normalnego szklanki particle.surfaceNormalVector
-    let solisWallRange = configuration.kernerFunctionBase/2
-    if(particle.velocity.angleTo(particle.surfaceNormalVector) > Math.PI/2 && particle.surfaceMinDistance < solisWallRange) {
-        particle.velocity = mirrorVector(pointVelocity, particle.surfaceNormalVector).multiplyScalar(configuration.glassBounceMultiplier);
+    if(boundary_3) {
+        let solisWallRange = configuration.kernerFunctionBase/2
+        if(particle.velocity.angleTo(particle.surfaceNormalVector) > Math.PI/2 && particle.surfaceMinDistance < solisWallRange) {
+            particle.velocity = mirrorVector(pointVelocity, particle.surfaceNormalVector).multiplyScalar(configuration.glassBounceMultiplier);
+        }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -143,7 +166,7 @@ function calculateVelosityAndPosition(particle, fluidType) {
 }
 
 function calculateGlassAttributesForOne(glassParticle, glassFluidType) {
-    var neighbourGenerator = getNeighbourParticles(particle);
+    var neighbourGenerator = getNeighbourParticles(glassParticle);
     let h = configuration.kernerFunctionBase;
     var kernelSumAll = 0;
     var velosityKernelSum = new THREE.Vector3();
@@ -152,25 +175,40 @@ function calculateGlassAttributesForOne(glassParticle, glassFluidType) {
     var kernelSumFluidOnly = 0;
 
     while ((nei = neighbourGenerator.next().value) != null) {
-        let dist = SPH2.calcVectorDiff(position, nei.position);
+        let dist = SPH2.calcVectorDiff(glassParticle.position, nei.position);
         kernelSumAll += SPH2.calcKernel(dist, h);
         velosityKernelSum.add(new THREE.Vector3().add(nei.velocity).multiplyScalar(SPH2.calcKernel(dist, h)));
 
         let neiFluidType = world.fluid.fluidTypeList[nei.fluidTypeIndex];
         if(neiFluidType.isMoveable) {   // is fluid
             pressureKernelSum += nei.pressure * SPH2.calcKernel(dist, h);
-            gravityDifKernelSum.add(new THREE.Vector3().add(nei.position).sub(glassParticle.position).multiplyScalar(SPH2.calcKernel(dist, h)));    // vec fglass --> fluid
+            gravityDifKernelSum.add(new THREE.Vector3().sub(nei.position).add(glassParticle.position).normalize().multiplyScalar(SPH2.calcKernel(dist, h) * nei.density));    // vec glass <-- fluid
             kernelSumFluidOnly += SPH2.calcKernel(dist, h);
         }
     }
-    var pressureGravitySum = gravityDifKernelSum.multiply(new THREE.Vector3().add(configuration.gravity).sub(glassParticle.acceleration));
+    var pressureGravitySum = gravityDifKernelSum.dot(new THREE.Vector3().add(configuration.gravity).sub(glassParticle.acceleration));
+    //console.log("pressureGravitySum", pressureGravitySum, "pressureKernelSum", pressureKernelSum, "kernelSumFluidOnly", kernelSumFluidOnly, "gravityDifKernelSum", gravityDifKernelSum)
+    glassParticle.glassCalculationVelocity = new THREE.Vector3().add(glassParticle.velocity).multiplyScalar(2).sub(velosityKernelSum.divideScalar(kernelSumAll))
+    glassParticle.pressure = (pressureKernelSum + pressureGravitySum) / kernelSumFluidOnly;
+    glassParticle.density = (glassParticle.pressure + glassFluidType.density) / glassFluidType.stiffness
 }
+
+function calculateGlassAttributesInFluidRange(fluid, startIndex, endIndex) {
+    for (let i = startIndex; i < endIndex; i++) {
+        let particle = fluid.particles[i]
+        let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex]
+        if(!fluidType.isMoveable)
+            calculateGlassAttributesForOne(particle, fluidType);
+    }
+}
+
 
 function calculateDensityInFluidRange(fluid, startIndex, endIndex) {
     for (let i = startIndex; i < endIndex; i++) {
         let particle = fluid.particles[i]
         let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex]
-        calculateDensityAndPressure(particle, fluidType);
+        if(fluidType.isMoveable)
+            calculateDensityAndPressure(particle, fluidType);
     }
 }
 
@@ -186,7 +224,8 @@ function calculateVelosityAndPositionInFluidRange(fluid, startIndex, endIndex) {
     for (let i = startIndex; i < endIndex; i++) {
         let particle = fluid.particles[i]
         let fluidType = fluid.fluidTypeList[particle.fluidTypeIndex]
-        if (fluidType.isMoveable) calculateVelosityAndPosition(particle, fluidType);
+        //if (fluidType.isMoveable) 
+        calculateVelosityAndPosition(particle, fluidType);
     }
 }
 
@@ -199,6 +238,7 @@ function densityShepardFilter(fluid) {
 
 function sphIteration(fluid) {
     calculateDensityInFluidRange(fluid, 0, fluid.particles.length)
+    if(boundary_4)calculateGlassAttributesInFluidRange(fluid, 0, fluid.particles.length)
     calculateAccelerationInFluidRange(fluid, 0, fluid.particles.length)
     calculateVelosityAndPositionInFluidRange(fluid, 0, fluid.particles.length)
 }
