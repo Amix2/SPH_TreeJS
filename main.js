@@ -28,12 +28,12 @@ window.onload = function() {
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
     
     
-    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.1, 5,true))
+    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.4, 5,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
     
-    world.addFluid(new THREE.Vector3(9,7,9), new THREE.Vector3(2,1,2), 1)
+    world.addFluid(new THREE.Vector3(8,5,8), new THREE.Vector3(4,2,4), 1)
 
-    mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 2, 3, 0);
+    mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 3, 4, 0);
     world.addParticleObject(mug);
     world.render()
 
@@ -43,7 +43,7 @@ window.onload = function() {
     //     console.log(part.cellIndex)
     // }
 
-    //window.setInterval(doSPH,20)
+    //window.setInterval(doSPH,800)
     window.requestAnimationFrame(doSPH)
     //doSPH();
     //doSPH();
@@ -56,9 +56,16 @@ function doSPH() {
     //let str = ""
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
+    var timeStart = new Date().getTime()
     sphIteration(world.fluid)
+    var timeEnd = new Date().getTime()
+    console.log("time for iteration: " , timeEnd - timeStart)
     for(let i=0; i<world.fluid.particles.length; i++) {
-        if(world.fluid.particles[i].position.y < 0) world.fluid.particles[i].position.y = 0;
+        let particle = world.fluid.particles[i];
+        if(particle.position.y < 0) particle.position.y = 0;
+        if(particle.surfaceAvgDistance > 0) {
+            //console.log("vec diff", new THREE.Vector3().add(particle.surfaceNormalVector).normalize().sub(new THREE.Vector3().add(particle.wallAcceleration).normalize()))
+        }
     }
     world.redrawAllParticles();
     world.render();
@@ -183,7 +190,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase/3;
+        var gapBetweenParticles = configuration.kernerFunctionBase/2;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
@@ -199,9 +206,9 @@ class World {
         this.scene = new THREE.Scene();
         
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-        this.camera.position.z = 1.1*configuration.sceneSize[2]
-        this.camera.position.x = -5;
-        this.camera.position.y = 1.1*configuration.sceneSize[1];
+        this.camera.position.z = 0.7*configuration.sceneSize[2]
+        this.camera.position.x = 0.3*configuration.sceneSize[0];
+        this.camera.position.y = 0.5*configuration.sceneSize[1];
         this.camera.lookAt(new THREE.Vector3(configuration.sceneSize[0],0,0));
 
         
@@ -253,7 +260,7 @@ class World {
 
         var pointColor = "#ffffff";
         var spotLight = new THREE.SpotLight(pointColor);
-        spotLight.position.x = 25;
+        spotLight.position.x = 0;
         spotLight.position.y = 25;
         spotLight.position.z = 1;
         spotLight.castShadow = true;
