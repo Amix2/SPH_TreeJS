@@ -161,8 +161,12 @@ function calculateVelosityAndPosition(particle, fluidType) {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     //if(Math.abs(particle.velocity.x) > 100) throw "particle.velocity";
+    let oldPos = new THREE.Vector3().add(particle.position);
     pointPosition = SPH2.calcPositionChange(position, particle.velocity, dt);
     particle.position = pointPosition;
+    if(oldPos.sub(pointPosition).length()>configuration.kernerFunctionBase) {
+        console.error("Position changes too fast ", oldPos.sub(pointPosition).length())
+    }
 }
 
 function calculateGlassAttributesForOne(glassParticle, glassFluidType) {

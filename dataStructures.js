@@ -17,8 +17,8 @@ class Fluid {
         let numOfCells = (Math.ceil(configuration.sceneSize[0] / configuration.kernerFunctionBase))
             * (Math.ceil(configuration.sceneSize[1] / configuration.kernerFunctionBase) )
             * (Math.ceil(configuration.sceneSize[2] / configuration.kernerFunctionBase));
-        this.cells = new Array(numOfCells);
-        this.createAllCells()
+        //this.cells = new Array(numOfCells);
+        //this.createAllCells()
         this.fluidTypeList = []
     }
 
@@ -41,7 +41,7 @@ class Fluid {
         particle.mass = this.fluidTypeList[particle.fluidTypeIndex].mass;
         this.particles.push(particle);
         try{
-            this.assignCellToParticle(particle)
+            //this.assignCellToParticle(particle)
         } catch(error) {
             console.error("Cannot add particle to sim", particle)
         }
@@ -83,6 +83,14 @@ function* getNeighbourParticles(particle)	{// generator dający wszystkie sząst
                 }
             }
     return null
+}
+
+function convertParticleCordtoCellCord(pX, pY, pZ) {
+    return [
+        Math.floor(pX / configuration.kernerFunctionBase),
+        Math.floor(pY / configuration.kernerFunctionBase),
+        Math.floor(pZ / configuration.kernerFunctionBase)
+    ]
 }
 
 class Particle {

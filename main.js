@@ -28,12 +28,12 @@ window.onload = function() {
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
     
     
-    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.1, 5,true))
+    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.4, 5,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
     
-    world.addFluid(new THREE.Vector3(9,7,9), new THREE.Vector3(2,2,2), 1)
+    world.addFluid(new THREE.Vector3(8,5,8), new THREE.Vector3(4,2,4), 1)
 
-    mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 2, 3, 0);
+    mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 3, 4, 0);
     world.addParticleObject(mug);
     world.render()
 
@@ -43,8 +43,8 @@ window.onload = function() {
     //     console.log(part.cellIndex)
     // }
 
-    window.setInterval(doSPH,8)
-    //window.requestAnimationFrame(doSPH)
+    //window.setInterval(doSPH,800)
+    window.requestAnimationFrame(doSPH)
     //doSPH();
     //doSPH();
 
@@ -74,7 +74,7 @@ function doSPH() {
     //for(let i=0; i<world.fluid.particles.length; i++) str += world.fluid.particles[i].position.x + ":" + world.fluid.particles[i].position.y + ":" + world.fluid.particles[i].position.z + " "
     //console.log(str)
 
-    //window.requestAnimationFrame(doSPH)
+    window.requestAnimationFrame(doSPH)
 }
 
 var configuration = {
@@ -190,7 +190,7 @@ class World {
     }
 
     addFluid(vPosition, vSize, fluidType) {
-        var gapBetweenParticles = configuration.kernerFunctionBase/3;
+        var gapBetweenParticles = configuration.kernerFunctionBase/2;
         for(let iX=gapBetweenParticles/2; iX<vSize.x; iX+=gapBetweenParticles) 
             for(let iY=gapBetweenParticles/2; iY<vSize.y; iY+=gapBetweenParticles)
                 for(let iZ=gapBetweenParticles/2; iZ<vSize.z; iZ+=gapBetweenParticles) {
