@@ -24,14 +24,14 @@ window.onload = function() {
 
     //add mug
     //position, density, fluidIndex, radius, height, thickness
-    world.addFluidType(new FluidType(0xffffff, 65,5000,4500,0.05, 90,false))
+    world.addFluidType(new FluidType(0xffffff, 65,5000,4500,0.1, 90,false))
     //mug.rotatateAxis(new THREE.Vector3(0, 1, 1), Math.PI/3)
     
     
-    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.4, 5,true))
+    world.addFluidType(new FluidType(0xff0f00,65,3000,4500,0.2, 5,true))
     //world.addParticle(new Vector3(20, 20, 20), 0);
     
-    world.addFluid(new THREE.Vector3(8,5,8), new THREE.Vector3(4,2,4), 1)
+    //world.addFluid(new THREE.Vector3(8,5,8), new THREE.Vector3(4,2,4), 1)
 
     mug = new ParticleMug(new THREE.Vector3(10,7,10), configuration.kernerFunctionBase*0.5, 0, 3, 4, 0);
     world.addParticleObject(mug);

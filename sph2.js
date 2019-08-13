@@ -1,7 +1,7 @@
-var boundary_1 = false; // prosta zamiana cząstki szklanki na cząstke płynu
+var boundary_1 = true; // prosta zamiana cząstki szklanki na cząstke płynu
 var boundary_2 = false;
 var boundary_3 = true; // odbicie sprężyste
-var boundary_4 = true; // zaawansowania zamiana cząstki szklanki na cząstke płynu (wymaga dodatkowej fazy obliczania)
+var boundary_4 = false; // zaawansowania zamiana cząstki szklanki na cząstke płynu (wymaga dodatkowej fazy obliczania)
 
 function calculateDensityAndPressure(particle, fluidType) {
     var neighbourGenerator = getNeighbourParticles(particle);

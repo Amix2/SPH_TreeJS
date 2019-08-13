@@ -27,7 +27,7 @@ class ParticleObject{
             this.particles[i].position.sub(this.position);
             this.particles[i].position.applyAxisAngle(axis, value);
             this.particles[i].position.add(this.position);
-          }
+        }
     }
 }
 
@@ -35,13 +35,14 @@ class ParticleMug extends ParticleObject {
     constructor(position, gap, fluidIndex, radius, height, thickness){
         var mugGeometries = [];
         mugGeometries.push(new CyllinderParticleGeometry(new THREE.Vector3(), radius, height)); //outer cyllinder
-        mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, height * 0.5 + 0.5*gap, 0)), radius)); //outer bottom cap
+        mugGeometries.push(new CyllinderParticleGeometry(new THREE.Vector3(), radius-gap, height-gap)); //inner cyllinder
+        //mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, height * 0.5 + 0.5*gap, 0)), radius)); //outer bottom cap
+        //mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, (height-gap) * 0.5, 0)), radius-gap))
         if(thickness > 0){
-            var innerCylPos = position.add(new THREE.Vector3(0, thickness / 2.0, 0));
             var innerCylH = height - thickness;
             var innerCylR = radius - thickness;
-            mugGeometries.push(new CyllinderParticleGeometry(innerCylPos, innerCylR, innerCylH)); //inner cyllinder
-            mugGeometries.push(new CircleParticleGeometry(innerCylPos - (innerCylH / 2.0) - gap, innerCylR)); //inner cyllinder
+            mugGeometries.push(new CyllinderParticleGeometry(new THREE.Vector3(), innerCylR, innerCylH)); //inner cyllinder
+            mugGeometries.push(new CircleParticleGeometry(new THREE.Vector3().sub(new THREE.Vector3(0, innerCylH * 0.5 + 0.5*gap, 0)), innerCylR)); //inner cyllinder
   //          mugGeometries.push(new CircleParticleGeometry(position + (height / 2.0) + gap, innerCylR, radius)); // top rim
         }
         super(mugGeometries, position, gap, fluidIndex);        
@@ -57,7 +58,7 @@ class ParticleGeometry{
             throw new TypeError('Abstract class ParticleGeometry cannot be instantiated directly.'); 
         }
         if (this.generateParticles === undefined) {
-            throw new TypeError('Classes extending the ParticleGeometry abstra  ct class must implement generateParticles(density: number) function');
+            throw new TypeError('Classes extending the ParticleGeometry abstract class must implement generateParticles(density: number) function');
         }
 
         this.position = position;

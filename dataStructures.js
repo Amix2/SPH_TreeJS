@@ -95,19 +95,22 @@ function convertParticleCordtoCellCord(pX, pY, pZ) {
 
 class Particle {
     constructor(position, fluidTypeIndex,  mass) {
-        this.position = position; // położenie
+
+        this.position = position; // położenie      
         this.fluidTypeIndex = fluidTypeIndex;
-        this.mass = mass;
-        
         this.velocity = new THREE.Vector3(0, 0, 0);    	// prędkość
-        this.glassCalculationVelocity = new THREE.Vector3(0, 0, 0);
         this.acceleration = new THREE.Vector3(0, 0, 0);    // przyspieszenie
         this.surfaceNormalVector = new THREE.Vector3(0, 0, 0);    // wektor normalny szklanki
         this.surfaceAvgDistance = 0;
-        this.surfaceMinDistance = 0;
         this.density = 0;   // gęstość
         this.pressure = 0;   // ciśnienie
         this.cellIndex = null;
+
+        
+        this.mass = mass;
+        
+        this.glassCalculationVelocity = new THREE.Vector3(0, 0, 0);
+        this.surfaceMinDistance = 0;
         this.neighbourCount = 0;
         this.wallAcceleration =  new THREE.Vector3(0, 0, 0); // przyspieszenie ściany do testów
         //self.cell = Cell.from(r)  // komórka w której sie znajduje -> można ją dostać z położenia w czasie stałym (!)
